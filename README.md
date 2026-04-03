@@ -217,6 +217,36 @@ return {
 | Mantle | `#181825` |
 | Crust | `#11111b` |
 
+## 附錄：實用的 Tmux 原生快捷鍵
+
+以下為 Tmux 內建的常用操作，不需要額外設定即可使用。更完整的快捷鍵列表可參考 [Tmux Cheat Sheet](https://tmuxcheatsheet.com/)。
+
+### 面板（Pane）操作
+
+| 快捷鍵 | 功能 |
+| :--- | :--- |
+| `prefix` + `!` | 將當前面板拆出為獨立視窗 |
+| `prefix` + `{` | 將當前面板與上一個面板交換位置 |
+| `prefix` + `}` | 將當前面板與下一個面板交換位置 |
+| `prefix` + `z` | 縮放/還原當前面板（全螢幕切換） |
+| `prefix` + `q` | 顯示面板編號，按數字可快速切換 |
+
+### 面板佈局切換
+
+| 快捷鍵 | 功能 |
+| :--- | :--- |
+| `prefix` + `Space` | 循環切換佈局（垂直/水平等） |
+| `prefix` + `Alt` + `1` | 水平平均排列（even-horizontal） |
+| `prefix` + `Alt` + `2` | 垂直平均排列（even-vertical） |
+
+### 合併面板
+
+透過指令將其他視窗的面板合併到當前視窗：
+
+```
+prefix + : 後輸入 join-pane -s <來源視窗編號>
+```
+
 ## Credits
 
 Inspired by / based on [naivecynics](https://github.com/naivecynics/primary-tmux)
