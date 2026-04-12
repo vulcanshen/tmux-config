@@ -130,7 +130,7 @@ TPM 會在首次啟動時自動安裝。使用的外掛如下：
 
 1.  **複製專案：**
     ```bash
-    git clone https://github.com/vulcanshen/primary-tmux.git ~/.config/tmux
+    git clone https://github.com/vulcanshen/tmux-config.git ~/.config/tmux
     ```
 2.  **啟動 Tmux**，TPM 會自動安裝。或手動安裝：
     ```bash
