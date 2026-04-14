@@ -62,6 +62,7 @@
 | `prefix` + `r` | 重新載入設定檔 |
 | `prefix` + `-` | 垂直分割面板 |
 | `prefix` + `\` | 水平分割面板 |
+| `prefix` + `Q` | 關閉 tmux server（會跳確認提示） |
 
 ### 調整面板大小（Resize Mode）
 
