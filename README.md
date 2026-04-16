@@ -63,6 +63,7 @@
 | `prefix` + `-` | 垂直分割面板 |
 | `prefix` + `\` | 水平分割面板 |
 | `prefix` + `Q` | 關閉 tmux server（會跳確認提示） |
+| `prefix` + `M` | 合併其他視窗到當前面板（輸入來源視窗編號） |
 
 ### 調整面板大小（Resize Mode）
 
