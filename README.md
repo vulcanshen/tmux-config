@@ -96,16 +96,6 @@
 | `y`（複製模式中） | 複製選取內容並退出 |
 | `prefix` + `]` | 貼上複製的內容 |
 
-### Extrakto（文字擷取）
-
-[Extrakto](https://github.com/laktak/extrakto) 可以透過模糊搜尋，快速擷取畫面上可見的文字內容（如 URL、檔案路徑、git hash 等），免去手動進入複製模式選取的麻煩。
-
-*   `prefix` + `Tab` — 啟動 Extrakto
-*   會彈出 fzf 模糊搜尋介面，自動列出當前畫面中可辨識的文字片段
-*   輸入關鍵字過濾，選取後自動插入到命令列
-
-適用場景：快速複製畫面上的 URL、檔案路徑、IP 位址、git commit hash 等。
-
 ### 其他設定
 
 *   啟用滑鼠支援
@@ -125,7 +115,6 @@ TPM 會在首次啟動時自動安裝。使用的外掛如下：
 | `tmux-plugins/tmux-battery` | 電池狀態顯示 |
 | `tmux-plugins/tmux-cpu` | CPU 使用率顯示 |
 | `thewtex/tmux-mem-cpu-load` | 記憶體使用率顯示 |
-| `laktak/extrakto` | 文字擷取工具 |
 | `christoomey/vim-tmux-navigator` | Vim 與 Tmux 間無縫切換面板 |
 | `dreknix/tmux-primary-ip` | 主要 IP 位址顯示 |
 
