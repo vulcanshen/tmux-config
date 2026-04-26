@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-04-26
+
+- 視窗標籤改為膠囊形狀（圓弧邊角）
+  - Active：天藍色、Activity：綠色、Bell：紅色、Inactive：深灰
+  - 視窗名稱另以灰底顯示，與索引顏色區隔
+- 新增 scroll mode（`prefix + u/d` 進入），支援 vim 風格導航
+  - `u/d` 翻頁、`j/k` 單行（送 `Option+j/k`）、`gg/G` 跳頂底、`q/Esc` 離開
+- 新增 `prefix + l g` 開啟 lazygit popup（chord）
+- 新增 `prefix + ?` 用 fzf 搜尋所有 keybindings
+- 新增 `prefix + ,` 重新命名視窗（fzf popup，ESC 取消）
+- 新增 `prefix + _` 全寬下方分割、`prefix + |` 全高右側分割
+- Pane border 增強：左側目錄路徑、右側 git branch + 當前指令
+  - 指令依類型顯示對應 icon（zsh、nvim、spf、bash、ssh、claude）
+  - 非 git 目錄不顯示 git icon
+- 將目錄路徑從第二行 status bar 移至 pane border（移除第二行）
+- `repeat-time` 從 300ms 增至 2000ms
+- 移除 extrakto 外掛
+- 更新截圖
+
 ## 2026-04-14
 
 - 新增 `prefix + Q` 關閉 tmux server（含確認提示）
