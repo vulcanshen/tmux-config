@@ -1,0 +1,43 @@
+prefix -            上下分割（同 pane 路徑）
+prefix _            上下分割（全寬）
+prefix \            左右分割
+prefix |            左右分割（全寬）
+prefix t            新 window
+prefix q            detach 並關掉客戶端
+prefix Q            殺整個 tmux server（有確認）
+prefix c            進入 copy mode (vi)
+prefix u            page up + 進 scroll mode
+prefix d            page down + 進 scroll mode
+prefix k            上一行 + 進 scroll mode
+prefix j            下一行 + 進 scroll mode
+prefix G            跳到最底 + 進 scroll mode
+prefix g g          跳到最頂（vim gg）
+prefix ?            顯示此說明
+prefix `            傳送一個字面 backtick
+prefix o o          o-mode  zoom pane toggle
+prefix o k          o-mode  開 km8 (fullscreen)
+prefix o g          o-mode  開 lazygit (fullscreen)
+prefix o f          o-mode  開 spf (fullscreen)
+prefix s w          s-mode  search window picker
+prefix s s          s-mode  search session picker
+prefix m i          m-mode  move in（合併 pane 到指定 window）
+prefix m o          m-mode  move out（break pane 成獨立 window）
+prefix r l          r-mode  reload config
+prefix r s h        rs-mode resize left
+prefix r s j        rs-mode resize down
+prefix r s k        rs-mode resize up
+prefix r s l        rs-mode resize right
+prefix r n w        rn-mode rename window（空字串重置為自動命名）
+prefix r n s        rn-mode rename session
+prefix r m w        rm-mode remove window
+prefix r m p        rm-mode remove pane
+scroll  u           scroll  page up（mode 內）
+scroll  d           scroll  page down（mode 內）
+scroll  k           scroll  上一行（mode 內）
+scroll  j           scroll  下一行（mode 內）
+scroll  G           scroll  跳到最底（mode 內）
+scroll  g g         scroll  跳到最頂（mode 內）
+scroll  q / Esc     scroll  退出 scroll mode
+copy    v           copy    開始選取（copy mode 內）
+copy    y           copy    copy selection（copy mode 內）
+mode    q / Esc     any     退出當前 mode

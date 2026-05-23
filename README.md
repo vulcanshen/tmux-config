@@ -42,12 +42,6 @@
 
 本設定將 prefix 改為 `` ` ``（backtick），取代預設的 `Ctrl+b`，操作更順手。
 
-| 按鍵 | 功能 |
-| :--- | :--- |
-| `` ` `` | prefix 鍵 |
-| `` ` `` `` ` `` | 輸入 literal backtick 字元 |
-| `` ` `` + `p` | 切換到上一個使用過的視窗（last-window） |
-
 > **如果想恢復預設的 `Ctrl+b`：** 將 `tmux.conf` 中以下三行註解掉即可：
 > ```bash
 > # set -g prefix `
@@ -55,46 +49,90 @@
 > # bind ` send-prefix
 > ```
 
-### 快捷鍵
+### 快捷鍵概覽
 
-| 快捷鍵 | 功能 |
+熱鍵設計採用 **mode-based namespace**：將相關操作分組到單字母 mode entry 下，避免單層字母用完、提升直觀度。每個 mode 都可用 `q` 或 `Esc` 退出，當前 mode 會顯示在 status bar 左側（橘色齒輪）。
+
+`` prefix + ? `` 可隨時打開 fzf 搜索 cheatsheet（內容存於 `keybindings.txt`）。
+
+#### 單鍵直接執行
+
+| Key | Action |
 | :--- | :--- |
-| `prefix` + `r` | 重新載入設定檔 |
-| `prefix` + `-` | 垂直分割面板 |
-| `prefix` + `\` | 水平分割面板 |
-| `prefix` + `Q` | 關閉 tmux server（會跳確認提示） |
-| `prefix` + `M` | 合併其他視窗到當前面板（輸入來源視窗編號） |
-| `prefix` + `w` | 彈出 fzf 浮動視窗選擇並切換視窗 |
+| `prefix -` | 上下分割（同 pane 路徑） |
+| `prefix _` | 上下分割（全寬） |
+| `prefix \` | 左右分割 |
+| `prefix \|` | 左右分割（全寬） |
+| `prefix t` | 新 window |
+| `prefix q` | detach 並關掉客戶端 |
+| `prefix Q` | 殺整個 tmux server（有確認） |
+| `prefix c` | 進入 copy mode (vi) |
+| `prefix u/d/k/j` | page up/down、上/下一行 + 進 scroll mode |
+| `prefix G` | 跳到最底 + 進 scroll mode |
+| `prefix g g` | 跳到最頂（vim gg） |
+| `prefix ?` | 顯示 keybinding 搜索 popup |
+| `` prefix ` `` | 傳送一個字面 backtick |
 
-### 調整面板大小（Resize Mode）
+#### Mode Entries（兩層 namespace）
 
-按下 `prefix` + `H/J/K/L` 會調整面板大小並進入 **resize 模式**，在此模式下可以自由連按不同方向鍵，無需再按 prefix：
+**`prefix o` → o-mode（open apps）**
 
-| 快捷鍵 | 功能 |
+| Sub-key | Action |
 | :--- | :--- |
-| `prefix` + `H` | 向左縮放 5 格，進入 resize 模式 |
-| `prefix` + `J` | 向下縮放 5 格，進入 resize 模式 |
-| `prefix` + `K` | 向上縮放 5 格，進入 resize 模式 |
-| `prefix` + `L` | 向右縮放 5 格，進入 resize 模式 |
+| `oo` | zoom pane toggle |
+| `ok` | 開 km8 (fullscreen) |
+| `og` | 開 lazygit (fullscreen) |
+| `of` | 開 spf (fullscreen) |
 
-進入 resize 模式後，直接按 `H/J/K/L` 即可連續調整，可自由切換方向（例如 `K K K J J L`）。停止按鍵後會自動退出 resize 模式（超時時間為 `repeat-time`，預設 300ms）。
+**`prefix s` → s-mode（search）**
+
+| Sub-key | Action |
+| :--- | :--- |
+| `sw` | search window picker（fzf popup） |
+| `ss` | search session picker（含「New Session」選項） |
+
+**`prefix m` → m-mode（move）**
+
+| Sub-key | Action |
+| :--- | :--- |
+| `mi` | move in（合併 pane 到指定 window） |
+| `mo` | move out（break pane 成獨立 window） |
+
+**`prefix r` → r-mode（action namespace）**
+
+| Sub-key | Action |
+| :--- | :--- |
+| `rl` | reload config |
+| `rs` | 進 rs-mode（resize） |
+| `rn` | 進 rn-mode（rename） |
+| `rm` | 進 rm-mode（remove） |
+
+**`prefix rs` → rs-mode（resize）** — 進入後直接連按 `h/j/k/l` 調整方向
+
+**`prefix rn` → rn-mode（rename）**
+
+| Sub-key | Action |
+| :--- | :--- |
+| `rnw` | rename window（空字串重置為自動命名） |
+| `rns` | rename session |
+
+**`prefix rm` → rm-mode（remove）**
+
+| Sub-key | Action |
+| :--- | :--- |
+| `rmw` | remove window |
+| `rmp` | remove pane |
 
 ### 複製模式（Copy Mode）
 
-使用 vi 風格的按鍵進行文字選取與複製：
-
-1.  `prefix` + `v` — 進入複製模式
-2.  使用 `h/j/k/l` 移動游標
-3.  `v` — 開始選取文字（類似 Vim 的 Visual Mode）
-4.  `y` — 複製選取內容並退出複製模式
-5.  `prefix` + `]` — 貼上已複製的內容
+`prefix + c` 進入 copy mode（vi 風格）：
 
 | 快捷鍵 | 功能 |
 | :--- | :--- |
-| `prefix` + `v` | 進入複製模式 |
-| `v`（複製模式中） | 開始選取 |
-| `y`（複製模式中） | 複製選取內容並退出 |
-| `prefix` + `]` | 貼上複製的內容 |
+| `h/j/k/l` | 移動游標 |
+| `v` | 開始選取 |
+| `y` | 複製選取內容並退出 |
+| `prefix ]` | 貼上複製的內容 |
 
 ### 其他設定
 
