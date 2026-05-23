@@ -1,43 +1,44 @@
-prefix -            上下分割（同 pane 路徑）
-prefix _            上下分割（全寬）
-prefix \            左右分割
-prefix |            左右分割（全寬）
-prefix t            新 window
-prefix q            detach 並關掉客戶端
-prefix Q            殺整個 tmux server（有確認）
-prefix c            進入 copy mode (vi)
-prefix u            page up + 進 scroll mode
-prefix d            page down + 進 scroll mode
-prefix k            上一行 + 進 scroll mode
-prefix j            下一行 + 進 scroll mode
-prefix G            跳到最底 + 進 scroll mode
-prefix g g          跳到最頂（vim gg）
-prefix ?            顯示此說明
-prefix `            傳送一個字面 backtick
-prefix o o          o-mode  zoom pane toggle
-prefix o k          o-mode  開 km8 (fullscreen)
-prefix o g          o-mode  開 lazygit (fullscreen)
-prefix o f          o-mode  開 spf (fullscreen)
-prefix s w          s-mode  search window picker
-prefix s s          s-mode  search session picker
-prefix m i          m-mode  move in（合併 pane 到指定 window）
-prefix m o          m-mode  move out（break pane 成獨立 window）
-prefix r l          r-mode  reload config
-prefix r s h        rs-mode resize left
-prefix r s j        rs-mode resize down
-prefix r s k        rs-mode resize up
-prefix r s l        rs-mode resize right
-prefix r n w        rn-mode rename window（空字串重置為自動命名）
-prefix r n s        rn-mode rename session
-prefix r m w        rm-mode remove window
-prefix r m p        rm-mode remove pane
-scroll  u           scroll  page up（mode 內）
-scroll  d           scroll  page down（mode 內）
-scroll  k           scroll  上一行（mode 內）
-scroll  j           scroll  下一行（mode 內）
-scroll  G           scroll  跳到最底（mode 內）
-scroll  g g         scroll  跳到最頂（mode 內）
-scroll  q / Esc     scroll  退出 scroll mode
-copy    v           copy    開始選取（copy mode 內）
-copy    y           copy    copy selection（copy mode 內）
-mode    q / Esc     any     退出當前 mode
+prefix -            split vertically (same path) / 上下分割（同 pane 路徑）
+prefix _            split vertically full-width / 上下分割（全寬）
+prefix \            split horizontally / 左右分割
+prefix |            split horizontally full-width / 左右分割（全寬）
+prefix t            new window / 新 window
+prefix q            detach client / detach 並關掉客戶端
+prefix Q            kill tmux server (confirm) / 殺整個 tmux server（有確認）
+prefix c            enter copy mode (vi) / 進入 copy mode (vi)
+prefix u            page up + enter scroll mode / page up + 進 scroll mode
+prefix d            page down + enter scroll mode / page down + 進 scroll mode
+prefix k            line up + enter scroll mode / 上一行 + 進 scroll mode
+prefix j            line down + enter scroll mode / 下一行 + 進 scroll mode
+prefix G            jump to bottom + enter scroll mode / 跳到最底 + 進 scroll mode
+prefix g g          jump to top (vim gg) / 跳到最頂（vim gg）
+prefix ?            show this cheatsheet / 顯示此說明
+prefix `            send literal backtick / 傳送一個字面 backtick
+prefix :            open command-line popup / 開啟命令列 popup
+prefix o o          o-mode  zoom pane toggle / zoom pane toggle
+prefix o k          o-mode  open km8 (fullscreen) / 開 km8 (fullscreen)
+prefix o g          o-mode  open lazygit (fullscreen) / 開 lazygit (fullscreen)
+prefix o f          o-mode  open spf (fullscreen) / 開 spf (fullscreen)
+prefix s w          s-mode  search window picker / search window picker
+prefix s s          s-mode  search session picker / search session picker（含「New Session」選項）
+prefix m i          m-mode  move in (merge pane into window) / move in（合併 pane 到指定 window）
+prefix m o          m-mode  move out (break pane to new window) / move out（break pane 成獨立 window）
+prefix r l          r-mode  reload config / reload config
+prefix r s h        rs-mode resize left / resize left
+prefix r s j        rs-mode resize down / resize down
+prefix r s k        rs-mode resize up / resize up
+prefix r s l        rs-mode resize right / resize right
+prefix r n w        rn-mode rename window (empty to reset auto) / rename window（空字串重置為自動命名）
+prefix r n s        rn-mode rename session / rename session
+prefix r m w        rm-mode remove window / remove window
+prefix r m p        rm-mode remove pane / remove pane
+scroll  u           scroll  page up (in mode) / page up（mode 內）
+scroll  d           scroll  page down (in mode) / page down（mode 內）
+scroll  k           scroll  line up (in mode) / 上一行（mode 內）
+scroll  j           scroll  line down (in mode) / 下一行（mode 內）
+scroll  G           scroll  jump to bottom (in mode) / 跳到最底（mode 內）
+scroll  g g         scroll  jump to top (in mode) / 跳到最頂（mode 內）
+scroll  q / Esc     scroll  exit scroll mode / 退出 scroll mode
+copy    v           copy    begin selection (in copy mode) / 開始選取（copy mode 內）
+copy    y           copy    copy selection (in copy mode) / copy selection（copy mode 內）
+mode    q / Esc     any     exit current mode / 退出當前 mode
