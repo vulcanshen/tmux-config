@@ -196,7 +196,10 @@ cp ~/.config/tmux/lualine.lua ~/.config/nvim/lua/plugins/lualine.lua
 
 ## Neovim (vim-tmux-navigator)
 
-搭配 `christoomey/vim-tmux-navigator` 外掛，可以在 Tmux 與 Neovim 之間使用 `Ctrl` + `h/j/k/l` 無縫切換面板。
+搭配 `christoomey/vim-tmux-navigator` 外掛，可以在 Tmux 與 Neovim 之間使用 `Option` + `h/j/k/l` 無縫切換面板。
+
+> 預設綁定為 `Ctrl` + `h/j/k/l`，但 `Ctrl + h/l` 在 terminal 內常與行編輯快捷鍵衝突，因此本設定將兩邊一起改成 `Option`（macOS 的 Meta 鍵）。
+> macOS 需在 terminal 設定中開啟 `option-as-alt`（Ghostty: `macos-option-as-alt = true`），否則 Option 會被當作 dead-key 用於輸入特殊字元。
 
 ### Neovim 端設定
 
@@ -213,12 +216,15 @@ return {
     "TmuxNavigatePrevious",
     "TmuxNavigatorProcessList",
   },
+  init = function()
+    vim.g.tmux_navigator_no_mappings = 1
+  end,
   keys = {
-    { "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
-    { "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
-    { "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
-    { "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
-    { "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+    { "<M-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
+    { "<M-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
+    { "<M-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
+    { "<M-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
+    { "<M-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
   },
 }
 ```
@@ -227,11 +233,11 @@ return {
 
 | 快捷鍵 | 功能 |
 | :--- | :--- |
-| `Ctrl` + `h` | 切換到左方面板 |
-| `Ctrl` + `j` | 切換到下方面板 |
-| `Ctrl` + `k` | 切換到上方面板 |
-| `Ctrl` + `l` | 切換到右方面板 |
-| `Ctrl` + `\` | 切換到上一個面板 |
+| `Option` + `h` | 切換到左方面板 |
+| `Option` + `j` | 切換到下方面板 |
+| `Option` + `k` | 切換到上方面板 |
+| `Option` + `l` | 切換到右方面板 |
+| `Option` + `\` | 切換到上一個面板 |
 
 ## 色票
 
