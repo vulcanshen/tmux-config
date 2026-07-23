@@ -64,8 +64,6 @@
 | `prefix \` | 左右分割 |
 | `prefix \|` | 左右分割（全寬） |
 | `prefix t` | 新 window |
-| `prefix q` | detach 並關掉客戶端 |
-| `prefix Q` | 殺整個 tmux server（有確認） |
 | `prefix c` | 進入 copy mode (vi) |
 | `prefix u/d/k/j` | page up/down、上/下一行 + 進 scroll mode |
 | `prefix G` | 跳到最底 + 進 scroll mode |
@@ -284,7 +282,6 @@ return {
 | `prefix` + `{` | 將當前面板與上一個面板交換位置 |
 | `prefix` + `}` | 將當前面板與下一個面板交換位置 |
 | `prefix` + `z` | 縮放/還原當前面板（全螢幕切換） |
-| `prefix` + `q` | 顯示面板編號，按數字可快速切換 |
 
 ### 面板佈局切換
 

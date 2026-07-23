@@ -3,8 +3,8 @@ prefix _            split vertically full-width / 上下分割（全寬）
 prefix \            split horizontally / 左右分割
 prefix |            split horizontally full-width / 左右分割（全寬）
 prefix t            new window / 新 window
-prefix q            detach client / detach 並關掉客戶端
-prefix Q            kill tmux server (confirm) / 殺整個 tmux server（有確認）
+prefix H            layout: all panes horizontal (side-by-side) / 所有 pane 左右並排
+prefix V            layout: all panes vertical (stacked) / 所有 pane 上下堆疊
 prefix c            enter copy mode (vi) / 進入 copy mode (vi)
 prefix u            page up + enter scroll mode / page up + 進 scroll mode
 prefix d            page down + enter scroll mode / page down + 進 scroll mode
