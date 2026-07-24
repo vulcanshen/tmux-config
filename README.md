@@ -74,6 +74,7 @@
 | `prefix \` | 左右分割 |
 | `prefix \|` | 左右分割（全寬） |
 | `prefix t` | 新 window |
+| `prefix q` / `prefix Esc` | 取消 prefix 或退出任何 mode（全域 quit） |
 | `prefix H` | 前一個 window，並進入 `w-nav` mode 可連按（`q`/`Esc` 退出） |
 | `prefix L` | 下一個 window，並進入 `w-nav` mode 可連按 |
 | `prefix V` | layout: all panes vertical (stacked) |
