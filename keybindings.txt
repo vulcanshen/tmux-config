@@ -3,7 +3,8 @@ prefix _            split vertically full-width / 上下分割（全寬）
 prefix \            split horizontally / 左右分割
 prefix |            split horizontally full-width / 左右分割（全寬）
 prefix t            new window / 新 window
-prefix H            layout: all panes horizontal (side-by-side) / 所有 pane 左右並排
+prefix H            w-nav   previous window + enter w-nav (chain H/L, q/Esc to exit) / 前一個 window，進 w-nav 可連按
+prefix L            w-nav   next window + enter w-nav (chain H/L, q/Esc to exit) / 下一個 window，進 w-nav 可連按
 prefix V            layout: all panes vertical (stacked) / 所有 pane 上下堆疊
 prefix c            enter copy mode (vi) / 進入 copy mode (vi)
 prefix u            page up + enter scroll mode / page up + 進 scroll mode

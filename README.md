@@ -35,8 +35,18 @@
 
 ### 視窗顯示
 
-*   使用編號模式顯示視窗（自動重新命名）
+*   使用編號模式顯示視窗（自動重新命名，命名格式為當前路徑的最末層目錄名）
 *   視窗索引從 1 開始
+*   視窗標籤採用膠囊形狀（powerline 圓弧），四種狀態燈號：
+
+    | 狀態 | 顏色 | 觸發條件 |
+    | :--- | :--- | :--- |
+    | Bell | 紅 | 收到 `^G`（terminal bell） |
+    | `@ready` | 綠 | Claude Code Stop / Notification hook 主動觸發（「Claude 講完話 / 等妳 input」） |
+    | Activity | 橘 | pane 有 tty 輸出、且未進入靜默 |
+    | Default | 灰 | 平靜狀態（沒動過 或 動完停下來了） |
+
+    優先級：`bell > @ready > activity > default`。切到該 window 時 `@ready` 會自動清除。
 
 ### Prefix 鍵
 
@@ -64,10 +74,14 @@
 | `prefix \` | 左右分割 |
 | `prefix \|` | 左右分割（全寬） |
 | `prefix t` | 新 window |
+| `prefix H` | 前一個 window，並進入 `w-nav` mode 可連按（`q`/`Esc` 退出） |
+| `prefix L` | 下一個 window，並進入 `w-nav` mode 可連按 |
+| `prefix V` | layout: all panes vertical (stacked) |
 | `prefix c` | 進入 copy mode (vi) |
-| `prefix u/d/k/j` | page up/down、上/下一行 + 進 scroll mode |
-| `prefix G` | 跳到最底 + 進 scroll mode |
+| `prefix u/d/k/j` | page up/down、上/下一行 + 進 view mode |
+| `prefix G` | 跳到最底 + 進 view mode |
 | `prefix g g` | 跳到最頂（vim gg） |
+| `prefix :` | popup command line |
 | `prefix ?` | 顯示 keybinding 搜索 popup |
 | `` prefix ` `` | 傳送一個字面 backtick |
 
@@ -236,6 +250,30 @@ return {
 | `Option` + `k` | 切換到上方面板 |
 | `Option` + `l` | 切換到右方面板 |
 | `Option` + `\` | 切換到上一個面板 |
+
+## Claude Code 整合
+
+當 Claude Code 講完話或需要 input 時，讓對應的 tmux window tab 亮起綠色（`@ready` 狀態），即使妳在別的 window 也能一眼看到「Claude 在等妳」。
+
+腳本位於 `claude-hooks/`：
+
+| 檔案 | 用途 |
+| :--- | :--- |
+| `mark-ready.sh` | 由 Claude Code 的 `Stop` / `Notification` hook 呼叫，把當前 pane 的 window 打上 `@ready=on` |
+| `install.sh` | 安裝 hooks 到 `~/.claude/settings.json`（idempotent、寫 timestamped backup、非破壞性合併） |
+| `uninstall.sh` | 反向移除，只清這個 repo 的 hook entry |
+
+### 安裝
+
+```bash
+~/.config/tmux/claude-hooks/install.sh
+```
+
+安裝後開新的 Claude Code session 生效。tmux 端已在 `tmux.conf` 內建好對應的 `window-status-format` 分支與 `after-select-window` 清 flag 機制，不需額外設定。
+
+### 為什麼需要
+
+tmux 內建的 `monitor-silence` 是靠 tty 判斷輸出停頓，但 Claude Code 有 spinner 動畫會持續寫 tty，`silence` 永遠不會觸發。透過 Claude Code 自己的 hook 主動通知 tmux，繞開這個限制。
 
 ## 色票
 
