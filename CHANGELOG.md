@@ -2,8 +2,8 @@
 
 ## 2026-07-24
 
-- **`prefix q` / `prefix Escape` 全域取消**：任何 mode（含剛按下 prefix 的 pending 狀態）都可以按 `q` 或 `Esc` 取消回到 terminal focus
-  - 所有 sub-mode 內原本就有 `q`/`Esc` 退出，這次加上主 prefix table 使得語意一致
+- **`prefix q` 取消 prefix pending state**：按下 prefix 後想反悔，按 `q` 即可退出（無 side effect）
+  - 沒加 `prefix Escape`（Esc 在 Claude Code 是 interrupt 鍵，容易連按第二下 leak 到 pane 誤取消對話）
 - **`prefix H/L` 改用 `w-nav` mode chain**：不再靠 `-r` timeout（2 秒容易斷）
   - 進入後可連按 `H/L` 切換 window，直到 `q`/`Esc` 手動退出
   - 跟 view / o-mode / r-mode 的操作 pattern 一致
