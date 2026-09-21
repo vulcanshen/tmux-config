@@ -93,9 +93,10 @@
 | Sub-key | Action |
 | :--- | :--- |
 | `oo` | zoom pane toggle |
-| `ok` | 開 km8 (fullscreen) |
+| `ok` | 開 kbu (fullscreen) |
 | `og` | 開 lazygit (fullscreen) |
-| `of` | 開 spf (fullscreen) |
+| `of` | 開 filu (fullscreen) |
+| `ow` | 開 webu (fullscreen) |
 
 **`prefix s` → s-mode（search）**
 

@@ -18,9 +18,10 @@ prefix ?            show this cheatsheet / 顯示此說明
 prefix `            send literal backtick / 傳送一個字面 backtick
 prefix :            open command-line popup / 開啟命令列 popup
 prefix o o          o-mode  zoom pane toggle / zoom pane toggle
-prefix o k          o-mode  open km8 (fullscreen) / 開 km8 (fullscreen)
+prefix o k          o-mode  open kbu (fullscreen) / 開 kbu (fullscreen)
 prefix o g          o-mode  open lazygit (fullscreen) / 開 lazygit (fullscreen)
-prefix o f          o-mode  open spf (fullscreen) / 開 spf (fullscreen)
+prefix o f          o-mode  open filu (fullscreen) / 開 filu (fullscreen)
+prefix o w          o-mode  open webu (fullscreen) / 開 webu (fullscreen)
 prefix s w          s-mode  search window picker / search window picker
 prefix s s          s-mode  search session picker / search session picker（含「New Session」選項）
 prefix m i          m-mode  move in (merge pane into window) / move in（合併 pane 到指定 window）
