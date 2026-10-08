@@ -4,10 +4,6 @@
 
 此設定檔參考了 [這個 GitHub 討論串](https://github.com/catppuccin/tmux/discussions/317#discussioncomment-11064512)。
 
-## 截圖
-
-![Tmux 設定截圖](Screenshot.png?v=20260426)
-
 ## 功能特色
 
 ### 主題配色
