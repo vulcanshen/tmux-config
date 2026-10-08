@@ -83,6 +83,7 @@
 | `prefix G` | 跳到最底 + 進 view mode |
 | `prefix g g` | 跳到最頂（vim gg） |
 | `prefix :` | popup command line |
+| `prefix p` | prompt：在 pane 當前目錄執行 shell 指令（fire-and-forget；失敗時顯示錯誤提示） |
 | `prefix ?` | 顯示 keybinding 搜索 popup |
 | `` prefix ` `` | 傳送一個字面 backtick |
 
@@ -318,7 +319,6 @@ tmux 內建的 `monitor-silence` 是靠 tty 判斷輸出停頓，但 Claude Code
 
 | 快捷鍵 | 功能 |
 | :--- | :--- |
-| `prefix` + `!` | 將當前面板拆出為獨立視窗 |
 | `prefix` + `{` | 將當前面板與上一個面板交換位置 |
 | `prefix` + `}` | 將當前面板與下一個面板交換位置 |
 | `prefix` + `z` | 縮放/還原當前面板（全螢幕切換） |
