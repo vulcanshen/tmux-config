@@ -274,42 +274,24 @@ return {
 
 安裝後開新的 Claude Code session 生效。tmux 端已在 `tmux.conf` 內建好對應的 `window-status-format` 分支與 `after-select-window` 清 flag 機制，不需額外設定。
 
-### 為什麼需要
+> 設計緣由（為什麼不用 tmux 內建的 `monitor-silence`）見 [docs/dev-remarks.md](docs/dev-remarks.md)。
 
-tmux 內建的 `monitor-silence` 是靠 tty 判斷輸出停頓，但 Claude Code 有 spinner 動畫會持續寫 tty，`silence` 永遠不會觸發。透過 Claude Code 自己的 hook 主動通知 tmux，繞開這個限制。
+## 螢幕鎖定（locku，開發中）
+
+整合 locku（開發中的 terminal 螢幕鎖定程式），提供類似螢幕保護的鎖定：
+
+| 觸發方式 | 說明 |
+| :--- | :--- |
+| `prefix :` 後輸入 `locku` | 手動鎖定（所有 client 一起鎖） |
+| 閒置 300 秒 | 自動鎖定（`lock-after-time`） |
+
+鎖定具有持久性：鎖定期間重新 attach 或切換 session，新 client 會立刻被重新鎖上。
+
+> locku 尚在開發中，`tmux.conf` 的 `lock-command` 目前指向本機開發版路徑；未安裝 locku 的環境這組設定不會有實際作用。機制說明見 [docs/dev-remarks.md](docs/dev-remarks.md)。
 
 ## 色票
 
-色票定義於 `colors.conf`，基於 Catppuccin Mocha 主題。
-
-| 色彩名稱 | 色碼 |
-| :--- | :--- |
-| Rosewater | `#f5e0dc` |
-| Flamingo | `#f2cdcd` |
-| Pink | `#f5c2e7` |
-| Mauve | `#cba6f7` |
-| Red | `#f38ba8` |
-| Maroon | `#eba0ac` |
-| Peach | `#fab387` |
-| Yellow | `#f9e2af` |
-| Green | `#a6e3a1` |
-| Teal | `#94e2d5` |
-| Sky | `#89dceb` |
-| Sapphire | `#74c7ec` |
-| Blue | `#89b4fa` |
-| Lavender | `#b4befe` |
-| Text | `#cdd6f4` |
-| Subtext1 | `#bac2de` |
-| Subtext0 | `#a6adc8` |
-| Overlay2 | `#9399b2` |
-| Overlay1 | `#7f849c` |
-| Overlay0 | `#6c7086` |
-| Surface2 | `#585b70` |
-| Surface1 | `#45475a` |
-| Surface0 | `#313244` |
-| Base | `#1e1e2e` |
-| Mantle | `#181825` |
-| Crust | `#11111b` |
+色票定義於 [`colors.conf`](colors.conf)，基於 [Catppuccin](https://github.com/catppuccin/catppuccin) Mocha 主題 — 狀態列、視窗標籤與 popup 邊框的顏色皆取自這份定義。
 
 ## 附錄：實用的 Tmux 原生快捷鍵
 
@@ -338,6 +320,12 @@ tmux 內建的 `monitor-silence` 是靠 tty 判斷輸出停頓，但 Claude Code
 ```
 prefix + : 後輸入 join-pane -s <來源視窗編號>
 ```
+
+## 相關連結
+
+- [CHANGELOG](CHANGELOG.md) — 版本變更紀錄
+- [docs/dev-remarks.md](docs/dev-remarks.md) — 運作機制與設計決定（開發者備忘）
+- [keybindings.txt](keybindings.txt) — `prefix ?` cheatsheet 的資料來源
 
 ## Credits
 
