@@ -2,3 +2,5 @@ plugins/
 .DS_store
 .claude/
 /.clerk.json
+.idea/
+.DS_Store
