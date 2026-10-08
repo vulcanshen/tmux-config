@@ -272,18 +272,19 @@ return {
 
 > 設計緣由（為什麼不用 tmux 內建的 `monitor-silence`）見 [docs/dev-remarks.md](docs/dev-remarks.md)。
 
-## 螢幕鎖定（locku，開發中）
+## 螢幕鎖定（locku）
 
-整合 locku（開發中的 terminal 螢幕鎖定程式），提供類似螢幕保護的鎖定：
+整合 locku（terminal 螢幕鎖定程式），提供類似螢幕保護的鎖定：
 
 | 觸發方式 | 說明 |
 | :--- | :--- |
-| `prefix :` 後輸入 `locku` | 手動鎖定（所有 client 一起鎖） |
-| 閒置 300 秒 | 自動鎖定（`lock-after-time`） |
+| `prefix l` | 手動鎖定（所有 client 一起鎖） |
+| `prefix :` 後輸入 `locku` | 同上（command alias） |
+| 閒置逾時 | 自動鎖定（秒數由 locku 設定畫面控制） |
 
 鎖定具有持久性：鎖定期間重新 attach 或切換 session，新 client 會立刻被重新鎖上。
 
-> locku 尚在開發中，`tmux.conf` 的 `lock-command` 目前指向本機開發版路徑；未安裝 locku 的環境這組設定不會有實際作用。機制說明見 [docs/dev-remarks.md](docs/dev-remarks.md)。
+鎖定相關設定由 locku 的設定畫面（Integration > tmux）產生於 `~/.config/locku/locku.tmux.conf`，`tmux.conf` 僅以 `source-file -q` 讀入 — 未安裝 locku 的環境該檔不存在，整段自動略過。機制說明見 [docs/dev-remarks.md](docs/dev-remarks.md)。
 
 ## 色票
 

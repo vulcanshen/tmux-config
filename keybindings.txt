@@ -18,6 +18,7 @@ prefix ?            show this cheatsheet / 顯示此說明
 prefix `            send literal backtick / 傳送一個字面 backtick
 prefix :            open command-line popup / 開啟命令列 popup
 prefix p            prompt: run shell command in pane's current dir / 在 pane 當前目錄執行指令（無輸出；失敗跳錯誤提示）
+prefix l            lock all clients via locku / 鎖定畫面（locku 提供的 binding）
 prefix o o          o-mode  zoom pane toggle / zoom pane toggle
 prefix o k          o-mode  open kbu (fullscreen) / 開 kbu (fullscreen)
 prefix o g          o-mode  open lazygit (fullscreen) / 開 lazygit (fullscreen)

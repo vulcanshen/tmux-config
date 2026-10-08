@@ -25,6 +25,8 @@ tmux 的 lock 是 **client 層級的一次性動作** — session / server 沒�
 
 - locku 啟動時自己立 `@locked` flag（global）；`client-attached` 與
   `client-session-changed` 兩條 hook 檢查到 flag 就對新 client 補鎖
+  （hook 用 `run -C` + `lock-client -t #{hook_client}` 明確鎖「觸發事件的那個
+  client」— hook context 下未指定目標的 `lock-client` 對象有歧義）
 - flag 生命週期完全歸 locku 管：啟動立旗（冪等）、密碼驗證成功清旗、
   tty 斷線死亡**不**清旗（fail-closed）。config 端不立旗，因為
   `lock-after-time` 的內部觸發路徑繞不過 config
@@ -34,9 +36,11 @@ tmux 的 lock 是 **client 層級的一次性動作** — session / server 沒�
   lock-command 執行時 tmux 不做 format 展開、也不提供識別 client 的環境變數，
   tty 與烘入的 socket path 是 lock 程式回呼 tmux 的唯一管道
 
-**已知限制**：`lock-command` 目前指向本機開發版的絕對路徑，公開 repo 的使用者
-clone 後這段設定不可用（觸發即失敗、立即解鎖）。待 locku 發佈後由其安裝器
-處理（偵測環境、寫入正確路徑），tmux.conf 這邊不做 workaround。
+**設定所有權**：鎖定相關設定（`lock-command`、`lock-after-time`、alias、hooks、
+`prefix l`）由 locku 的設定畫面產生並覆寫 `~/.config/locku/locku.tmux.conf`，
+`tmux.conf` 僅 `source-file -q` 讀入。未安裝 locku 的環境該檔不存在、整段靜默
+略過 — 早期「開發版絕對路徑寫死在 tmux.conf、外人 clone 後觸發即失敗」的
+可攜性問題由此解決。
 
 ## `prefix p`（command prompt）的設計取捨
 
