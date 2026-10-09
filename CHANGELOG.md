@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-10-09
+
+- **膠囊列寬度不足時自動退讓**：不再蓋到左右兩側的資訊
+  - 全名放不下時，非當前 window 的膠囊收成只剩編號（當前 window 保留全名、燈號顏色照常）
+  - 還是放不下就捲動，兩端以 `<` `>` 標示，當前 window 永遠在畫面內
+  - `status-justify` 由 `absolute-centre` 改為 `centre`：膠囊列改以左右資訊之間的空白置中
+
+## 2026-10-08
+
+- **`prefix p` 在 pane 當前目錄執行指令**：popup 輸入框，適合 `idea .`、`open .` 這類直接發射的指令
+  - 成功不顯示輸出、popup 直接關閉；失敗才在 status line 跳紅字（exit code + 錯誤第一行，按任意鍵消失）
+  - popup 標題顯示當前目錄；alias / function 可用
+  - 預設的 `prefix !`（break-pane）移除，改用 `prefix m o`
+- **locku 螢幕鎖定整合**：`tmux.conf` 只 `source-file -q ~/.config/locku/locku.tmux.conf`
+  - 設定由 [locku](https://github.com/vulcanshen/locku) 的設定畫面產生；未安裝 locku 時整段靜默略過
+  - `prefix l` / `prefix : locku` 立即鎖定、閒置自動鎖定；鎖定期間新 attach 的 client 也會被鎖
+- **README 精簡**：只留使用者需要的內容，運作機制與設計理由移到 `docs/dev-remarks.md`；移除過期截圖
+
+## 2026-09-21
+
+- **o-mode launcher 更新**
+  - `prefix o g`：lazygit 直接開全畫面 log panel（`-sm full log`）
+  - `prefix o w`：新增，開 webu（fullscreen）
+  - `prefix o f`：spf 換成 filu；文件同步 km8 → kbu
+
 ## 2026-07-24
 
 - **`prefix q` 取消 prefix pending state**：按下 prefix 後想反悔，按 `q` 即可退出（無 side effect）
