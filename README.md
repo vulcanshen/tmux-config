@@ -43,6 +43,7 @@
     | Default | 灰 | 平靜狀態（沒動過 或 動完停下來了） |
 
     優先級：`bell > @ready > activity > default`。切到該 window 時 `@ready` 會自動清除。
+*   視窗多、寬度不夠時自動退讓，不會蓋到左右兩側的資訊：先把其他 window 的膠囊收成只剩編號（當前 window 保留全名，燈號顏色照常）；還是放不下就捲動，兩端以 `<` `>` 標示，當前 window 永遠在畫面內
 
 ### Prefix 鍵
 

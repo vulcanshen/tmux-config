@@ -17,6 +17,28 @@ tmux 端的任何推斷都是盲的，訊號必須由應用程式自己發出。
 - silence 沒有獨立顏色：「活動後靜默」與「從未活動」是同一個終態
   （都是「沒東西要看」），一律收斂到灰色
 
+## 膠囊列寬度不足時的退讓
+
+原本用 `status-justify absolute-centre` 讓膠囊列對準整個螢幕正中，但 tmux 對這個
+模式是直接把 list 畫在左右資訊之上（`format-draw.c`：「drawing them over the
+rest」），寬度不足就重疊。改為兩層退讓：
+
+- `status-justify centre`：list 被限制在左右資訊之間，放不下時走 tmux 內建捲動
+  （`<` `>` marker；`list=focus` 保證當前 window 可見）。代價是置中基準變成
+  左右之間的空白而非整個螢幕，左右寬度不同時會偏幾欄
+- `@status_names_fit`：用 `#{w:#{W:...}}` 估算「全部膠囊顯示全名」的寬度，
+  加上 status-left / status-right 展開後的寬度，跟 `client_width` 比較；放不下時
+  非當前膠囊只顯示編號（沿用未命名 window 的膠囊樣式），current-format 不受影響
+- 估算式不直接量 `window-status-format`（它引用了 `@status_names_fit`，會自我
+  遞迴），改用等寬佔位字元模擬膠囊外框（圓角 + 空白 + 分隔）
+- 已知誤差：判斷式在每個 window 的 format context 裡展開，status-left 的
+  zoom / copy 提示取的是該 window 的狀態而非當前 window，門檻附近可能差幾欄；
+  誤判的最壞結果是改走捲動，不會重疊
+- 否決過：多行 status（行數是 session 選項、無法依寬度自動決定，切換時 pane
+  整體跳動，膠囊也不會自動折行）、合併膠囊（每個 window 只省約 2 欄，名字長度
+  才是主要佔用）、保留 absolute-centre 的混合模式（要整段複製 tmux 預設的
+  `status-format[0]` 只為改 `align=`，tmux 升級時容易脫節）
+
 ## locku 鎖定整合的機制
 
 tmux 的 lock 是 **client 層級的一次性動作** — session / server 沒有「已鎖定」的
