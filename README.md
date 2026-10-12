@@ -74,7 +74,6 @@
 | `prefix q` | 取消 prefix pending state |
 | `prefix H` | 前一個 window，並進入 `w-nav` mode 可連按（`q`/`Esc` 退出） |
 | `prefix L` | 下一個 window，並進入 `w-nav` mode 可連按 |
-| `prefix V` | layout: all panes vertical (stacked) |
 | `prefix c` | 進入 copy mode (vi) |
 | `prefix u/d/k/j` | page up/down、上/下一行 + 進 view mode |
 | `prefix G` | 跳到最底 + 進 view mode |
@@ -115,11 +114,11 @@
 | Sub-key | Action |
 | :--- | :--- |
 | `rl` | reload config |
-| `rs` | 進 rs-mode（resize） |
+| `rs` | 進 rs-mode（resize、平均排列） |
 | `rn` | 進 rn-mode（rename） |
 | `rm` | 進 rm-mode（remove） |
 
-**`prefix rs` → rs-mode（resize）** — 進入後直接連按 `h/j/k/l` 調整方向
+**`prefix rs` → rs-mode（resize）** — 進入後直接連按 `h/j/k/l` 調整方向；`V` 所有 pane 上下平均排列、`H` 左右平均排列（排完自動離開 rs-mode）
 
 **`prefix rn` → rn-mode（rename）**
 
