@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-14
+
+- **狀態列精簡**：移除 CPU、記憶體、電量、日期時間（macOS 選單列已有），只留工作階段、mode 提示與 IP
+  - 外掛 tmux-battery、tmux-cpu、tmux-mem-cpu-load 一併移除（`prefix Alt+u` 可清掉 `plugins/` 下的殘留）
+- **視窗膠囊改版**：只有當前 window 顯示「編號 + 目錄名」，其他 window 只顯示編號與燈號顏色
+- **寬度不足時三層退讓**，開十幾個 window 也不破版：
+  1. 其他 window 拿掉膠囊外框，只剩有顏色的編號
+  2. 隱藏右側的 IP 位址
+  3. 還是放不下就捲動（`<` `>`），當前 window 永遠在畫面內
+
 ## 2026-10-12
 
 - **平均排列移進 rs-mode**：`prefix r s V` 所有 pane 上下平均排列、`prefix r s H` 左右平均排列

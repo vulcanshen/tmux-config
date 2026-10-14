@@ -17,27 +17,66 @@ tmux 端的任何推斷都是盲的，訊號必須由應用程式自己發出。
 - silence 沒有獨立顏色：「活動後靜默」與「從未活動」是同一個終態
   （都是「沒東西要看」），一律收斂到灰色
 
-## 膠囊列寬度不足時的退讓
+## 狀態列與膠囊列的版面
 
-原本用 `status-justify absolute-centre` 讓膠囊列對準整個螢幕正中，但 tmux 對這個
-模式是直接把 list 畫在左右資訊之上（`format-draw.c`：「drawing them over the
-rest」），寬度不足就重疊。改為兩層退讓：
+視窗一多（同時開十幾個專案）膠囊列就破版，因此狀態列整體重新配置：
 
-- `status-justify centre`：list 被限制在左右資訊之間，放不下時走 tmux 內建捲動
-  （`<` `>` marker；`list=focus` 保證當前 window 可見）。代價是置中基準變成
-  左右之間的空白而非整個螢幕，左右寬度不同時會偏幾欄
-- `@status_names_fit`：用 `#{w:#{W:...}}` 估算「全部膠囊顯示全名」的寬度，
-  加上 status-left / status-right 展開後的寬度，跟 `client_width` 比較；放不下時
-  非當前膠囊只顯示編號（沿用未命名 window 的膠囊樣式），current-format 不受影響
-- 估算式不直接量 `window-status-format`（它引用了 `@status_names_fit`，會自我
-  遞迴），改用等寬佔位字元模擬膠囊外框（圓角 + 空白 + 分隔）
-- 已知誤差：判斷式在每個 window 的 format context 裡展開，status-left 的
-  zoom / copy 提示取的是該 window 的狀態而非當前 window，門檻附近可能差幾欄；
-  誤判的最壞結果是改走捲動，不會重疊
-- 否決過：多行 status（行數是 session 選項、無法依寬度自動決定，切換時 pane
-  整體跳動，膠囊也不會自動折行）、合併膠囊（每個 window 只省約 2 欄，名字長度
-  才是主要佔用）、保留 absolute-centre 的混合模式（要整段複製 tmux 預設的
-  `status-format[0]` 只為改 `align=`，tmux 升級時容易脫節）
+- **只放 tmux 本身的資訊**：CPU、記憶體、電量、日期時間全部移除（macOS 選單列
+  已有），左右兩側從約 70 欄縮到不到 30 欄
+- **只有當前 window 顯示名字**：12 個專案 window 的全名膠囊約需 166 欄，光外框
+  （兩個圓角 + 兩個空白）每個就佔 4 欄；名字放不下是常態，所以非當前 window
+  一律只顯示編號 + 燈號顏色，不再依寬度切換
+- **`status-justify centre`**：原本的 `absolute-centre` 會直接把 list 畫在左右
+  資訊之上（`format-draw.c`：「drawing them over the rest」），寬度不足就重疊；
+  `centre` 把 list 限制在左右之間，放不下時走 tmux 內建捲動（`<` `>` marker，
+  `list=focus` 保證當前 window 可見）。代價是置中基準變成左右之間的空白
+
+寬度不足時的退讓順序：膠囊編號 → 拿掉外框的編號（每個省 2 欄）→ 隱藏 IP →
+捲動。判斷式 `@status_caps_fit` / `@status_ip_fit` 用 `#{w:#{W:...}}` 以佔位字元
+估算列表寬度，加上 status-left 與 IP 的寬度，跟 `client_width` 比較：
+
+- 估算不直接量 `window-status-format`（它引用了判斷式本身，會自我遞迴）
+- status-left 寬度用 `#{W:,#{w:#{T:status-left}}}` 量：只在當前 window 那一輪
+  展開，zoom / copy 提示才會取到當前 window 的狀態，而不是被迴圈到的 window
+- IP 寬度以常數 `@status_ip_w`（18）預留：tmux-primary-ip 只替換 status-right
+  裡的 `#{primary_ip}`，別處量不到，在 status-right 裡量自己又會遞迴
+- **坑**：巢狀 `#{W:}` 迴圈裡不能用 `loop_last_flag` — 外層跑到最後一個 window
+  時，內層每一輪都會讀到 1，最後一個 window 的判斷因此跟其他 window 不同。
+  估算一律每個 window 算一格分隔（多估 1 欄）
+- 任何估算誤差的最壞結果都是提早或延後進入捲動，不會重疊
+
+否決過：
+
+- 平均截短名字：150 欄、12 個 window 時每個名字只剩 3 個字（`clo…`），認不出來
+- 多行 status：行數是 session 選項、無法依寬度自動決定，切換時 pane 整體跳動，
+  膠囊也不會自動折行
+- 側邊欄：常駐版只能用 pane 模擬，會被平均排列、zoom、pane 導航波及且永久
+  佔寬；popup 版是 modal，無法常駐
+- 保留 absolute-centre 的混合模式：要整段複製 tmux 預設的 `status-format[0]`
+  只為改 `align=`，tmux 升級時容易脫節
+
+### 驗證方式：用巢狀 tmux 實際渲染狀態列
+
+`display -p` 量得到寬度，但看不到實際畫面，而且從外部 shell 執行時沒有 client
+context（`client_width` 為空、`#()` job 尚無輸出）。要看真實渲染，用獨立 socket
+起一個外層 tmux，在裡面以本設定跑內層 tmux，再 `capture-pane` 外層：
+
+```sh
+tmux -L simout -f /dev/null new-session -d -s out -x 120 -y 6 \
+  "env -u TMUX tmux -L simin -f sim.conf new-session -s test"
+tmux -L simout resize-window -t out -x 80     # 換寬度
+tmux -L simout capture-pane -p -t out | head -1
+```
+
+`sim.conf` 必須在**同一次載入**裡關掉 locku：內層 client 從不收按鍵，載入當下
+若已閒置超過 `lock-after-time` 會立刻被鎖，事後再補 `set` 來不及：
+
+```tmux
+source-file ~/.config/tmux/tmux.conf
+set -g lock-after-time 0
+set -g lock-command true
+set -gu @locked
+```
 
 ## locku 鎖定整合的機制
 
