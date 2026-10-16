@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-16
+
+- **popup 的框不再被吃掉**：狀態列在上方時，pane 持續重畫（例如 Claude Code 的側邊欄動畫）會蓋掉 popup 的上邊框
+  - 所有 fzf popup 改由 fzf 畫框：`prefix ?`、`prefix :`、`prefix p`、`prefix s w`、`prefix m i`、`prefix r n w`、`prefix r n s`、session picker、新增 session 的輸入框
+  - 框的上方多留一列（顯示底下 pane 的內容）；輸入框高一列，提示列上方多一列空白
+- **session picker 不再莫名彈出**：只有你所在的 session 被關掉時才彈，而且彈在那個 terminal 上
+  - 腳本建立的暫存 session、背景工作結束等「沒人在用的 session」關閉時不再打擾
+  - 需要同時更新 vulcanzsh 的 `modules/tmux-workflow.zsh`
+
 ## 2026-10-14
 
 - **狀態列精簡**：移除 CPU、記憶體、電量、日期時間（macOS 選單列已有），只留工作階段、mode 提示與 IP

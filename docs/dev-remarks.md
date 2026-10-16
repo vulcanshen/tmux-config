@@ -78,6 +78,50 @@ set -g lock-command true
 set -gu @locked
 ```
 
+## popup 的框由 fzf 畫
+
+狀態列放在上方時，tmux（3.7c 實測）保護 popup 的範圍會往下偏一列。pane 以同步輸出
+（DECSET 2026）、scroll region 捲動或插入／刪除列的方式更新時，tmux 會整塊重畫 pane，
+這時 popup 的第一列沒被保護、被 pane 內容蓋掉，popup 正下方那一列反而被擋住、停在
+舊內容。逐格寫入、清行（EL、ECH）不受影響；狀態列改放下方就不會偏，跟 pane 邊框
+標題列無關。
+
+Claude Code 的 fullscreen 模式用同步輸出，搭配持續重畫的側邊欄（ccdrawu），popup
+一開著上邊框就被吃掉。縮窄 popup 沒有用：只改側邊欄那一塊，tmux 也是整個 pane 重畫。
+
+因此所有 fzf popup 改成：
+
+- `display-popup -B` 不讓 tmux 畫框，改由 fzf `--border=rounded` 畫，並以
+  `--margin=1,0,0,0` 在最上面留一列空白給 tmux 蓋
+- 單行輸入框（`prefix :`、`prefix p`、rename、新增 session）高度從 3 改成 5：
+  留白、框兩列、提示列，再加一列清單區。只給 4 列時 fzf 會先省掉留白，框頂又被蓋掉
+- popup 開著時，框正下方那一列不會更新（中文字剛好跨在框的左緣時會少一個字），
+  關掉 popup 就恢復
+- 哪天 tmux 修好這個偏移，留白那一列只會變成框上方的一條空白
+- 全螢幕 popup（o-mode）不受影響：第一列落在狀態列上，pane 重畫碰不到
+
+否決過：
+
+- 改用狀態列上的 `command-prompt`（`prefix p` 試過一版）：不碰 pane 所以不受影響，
+  但輸入時狀態列整條被取代，`status-keys vi` 下 Esc 也不會直接取消，user 選擇保留 popup
+- 狀態列改放下方：可以根治，但整個版面都要跟著改
+
+### 驗證方式：在巢狀 tmux 裡模擬持續重畫的 pane
+
+沿用上面「用巢狀 tmux 實際渲染狀態列」的做法，內層 pane 改跑一個模擬 Claude Code＋
+側邊欄的腳本，再開 popup、`capture-pane` 外層，看框是否完整：
+
+```zsh
+printf '\e[?1049h'
+for r in {1..16}; do printf '\e[%d;1H第%d列 中文寬字元測試中文寬字元測試' $r $r; done
+t=0
+while true; do
+  t=$((t+1)); printf '\e[?2026h'   # synchronized output, like Claude Code
+  for r in {1..16}; do printf '\e[%d;100Hside%02d-t%-5d' $r $r $t; done
+  printf '\e[?2026l'; sleep 0.2
+done
+```
+
 ## locku 鎖定整合的機制
 
 tmux 的 lock 是 **client 層級的一次性動作** — session / server 沒有「已鎖定」的
@@ -113,6 +157,36 @@ tmux 的 lock 是 **client 層級的一次性動作** — session / server 沒�
 - 指令**同步執行**（否則抓不到 exit code），長駐型指令會卡住 popup，
   屬預期外用法
 - 用 `zsh -ic` 執行讓 alias / function 可用；若 rc 啟動太慢可拿掉 `-i`
+- popup 的 `-E` 指令不會展開 tmux format，框上的目錄標題改在 shell 裡用 `pwd` 算
 - 曾考慮過「送回當前 pane 執行」（send-keys）：pane 是 shell 時體驗最好，
   但 pane 跑 TUI（Claude Code、vim）時按鍵會被 TUI 吃掉造成誤動作，
   判斷分流又增加複雜度，最終捨棄
+
+## session 關閉後的 picker 只給失去 session 的 client
+
+`detach-on-destroy off` 讓 session 被關掉時，client 移到別的 session 而不是離開
+tmux；`session-closed` hook 再呼叫 vulcanzsh 的 `tmux_on_session_close` 彈出 picker。
+原本任何 session 關閉都會彈，其他專案的自動化測試在同一個 server 上建立、關閉暫存
+session 時，picker 就會莫名彈出來。
+
+`session-closed` 觸發時，tmux 只說哪個 session 關了，分不出有沒有 client 在上面。
+實測各事件的順序與 `client_last_session`：
+
+| 情境 | 事件順序 | `client_last_session` |
+| :--- | :--- | :--- |
+| client 所在的 session 被關 | `client-session-changed` → `session-closed` | 空 |
+| 正常切換 session | `client-session-changed` | 前一個 session |
+| 新 terminal attach | `client-session-changed` → `client-attached` | 空 |
+| 背景 session 關閉 | `session-closed` | — |
+
+因此：
+
+- `client-session-changed` 在 `client_last_session` 為空時，把 `@session_lost` 設成
+  該 client；正常切換時設成空字串
+- `client-attached` 清掉 `@session_lost`（attach 也會留下同樣的標記）
+- `tmux_on_session_close` 讀完就清掉：沒有標記就不彈；有標記就用 `display-popup -c`
+  彈在那個 client 上。同時有多個 terminal attach 時，不指定 client 會彈到別的 terminal
+- tmux.conf 與 vulcanzsh 要一起更新：只有新版 vulcanzsh 時，picker 永遠不會彈
+
+**坑**：`set-hook -g <hook> …` 不指定位置時，會把該 hook 整組換掉。locku 的補鎖 hook
+掛在 `[90]`，這裡的 hook 用固定位置 `[10]`，不論載入順序都不會互相覆蓋。
