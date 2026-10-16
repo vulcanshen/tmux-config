@@ -91,10 +91,14 @@ Claude Code 的 fullscreen 模式用同步輸出，搭配持續重畫的側邊�
 
 因此所有 fzf popup 改成：
 
-- `display-popup -B` 不讓 tmux 畫框，改由 fzf `--border=rounded` 畫，並以
-  `--margin=1,0,0,0` 在最上面留一列空白給 tmux 蓋
-- 單行輸入框（`prefix :`、`prefix p`、rename、新增 session）高度從 3 改成 5：
-  留白、框兩列、提示列，再加一列清單區。只給 4 列時 fzf 會先省掉留白，框頂又被蓋掉
+- `display-popup -B` 不讓 tmux 畫框，改由 fzf 畫，並在框的上方留一列給 tmux 蓋
+- 清單類（`prefix ?`、`prefix s w`、`prefix m i`、session picker）：`--border=rounded`
+  加 `--margin=1,0,0,0` 留白
+- 單行輸入框（`prefix :`、`prefix p`、rename、新增 session）：`--input-border` 只框
+  輸入列，框上方空的清單區就是留給 tmux 蓋的那一列，popup 4 列、框維持原本的 3 列。
+  不能用 margin：fzf 至少要留一列清單區，只給 4 列時會先省掉 margin，框頂又被蓋掉；
+  給 5 列則框裡多一列空白。新增 session 因此不用 `--reverse`（輸入列要在清單區下面），
+  名稱重複的警告改放在框的標題，不另佔一列
 - popup 開著時，框正下方那一列不會更新（中文字剛好跨在框的左緣時會少一個字），
   關掉 popup 就恢復
 - 哪天 tmux 修好這個偏移，留白那一列只會變成框上方的一條空白
@@ -157,7 +161,8 @@ tmux 的 lock 是 **client 層級的一次性動作** — session / server 沒�
 - 指令**同步執行**（否則抓不到 exit code），長駐型指令會卡住 popup，
   屬預期外用法
 - 用 `zsh -ic` 執行讓 alias / function 可用；若 rc 啟動太慢可拿掉 `-i`
-- popup 的 `-E` 指令不會展開 tmux format，框上的目錄標題改在 shell 裡用 `pwd` 算
+- popup 的 `-E` 指令不會展開 tmux format，框上的目錄標題改在 shell 裡用 `pwd` 算；
+  超過 40 字只留結尾（`…` 開頭），因為 fzf 會把放不下的標題整個藏掉
 - 曾考慮過「送回當前 pane 執行」（send-keys）：pane 是 shell 時體驗最好，
   但 pane 跑 TUI（Claude Code、vim）時按鍵會被 TUI 吃掉造成誤動作，
   判斷分流又增加複雜度，最終捨棄

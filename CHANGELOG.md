@@ -4,7 +4,10 @@
 
 - **popup 的框不再被吃掉**：狀態列在上方時，pane 持續重畫（例如 Claude Code 的側邊欄動畫）會蓋掉 popup 的上邊框
   - 所有 fzf popup 改由 fzf 畫框：`prefix ?`、`prefix :`、`prefix p`、`prefix s w`、`prefix m i`、`prefix r n w`、`prefix r n s`、session picker、新增 session 的輸入框
-  - 框的上方多留一列（顯示底下 pane 的內容）；輸入框高一列，提示列上方多一列空白
+  - 框的上方多留一列（顯示底下 pane 的內容），框本身維持原本的高度
+  - 新增 session 時名稱重複的警告改顯示在框的標題
+- **`prefix :`、`prefix p` 的輸入框變窄**：寬度從 80% 改成 50 欄，跟其他輸入框一致
+  - `prefix p` 的目錄標題太長時只顯示結尾，前面以 `…` 代替
 - **session picker 不再莫名彈出**：只有你所在的 session 被關掉時才彈，而且彈在那個 terminal 上
   - 腳本建立的暫存 session、背景工作結束等「沒人在用的 session」關閉時不再打擾
   - 需要同時更新 vulcanzsh 的 `modules/tmux-workflow.zsh`
