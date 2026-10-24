@@ -15,16 +15,15 @@
 狀態列位於頂部，只放 tmux 本身的資訊（時間、電量、CPU 等交給 macOS 選單列）：
 
 *   **左側**：工作階段名稱（按下 prefix 時高亮顯示）、縮放狀態、當前 mode（`copy` 或各 mode 名稱）
-*   **中間**：視窗列表（見下方「視窗顯示」）
-*   **右側**：主要 IP 位址（寬度不夠時自動隱藏）
+*   **右側**：視窗列表（見下方「視窗顯示」），緊貼著主要 IP 位址（IP 在寬度不夠時自動隱藏）
 
-每個面板上緣另有一條標題列，顯示該面板的完整路徑（`$HOME` 顯示為 `~`）、git branch 與執行中的程式。
+每個面板上緣另有一條標題列，顯示該面板的完整路徑（`$HOME` 顯示為 `~`）、git branch 與執行中的程式。縮小中的 o-mode 工具列在最右上那條標題列、git branch 的左邊（見下方「o-mode 工具縮小」）。
 
 ### 視窗顯示
 
 *   使用編號模式顯示視窗（自動重新命名，命名格式為當前路徑的最末層目錄名）
 *   視窗索引從 1 開始
-*   視窗標籤採用膠囊形狀（powerline 圓弧）：**當前 window 顯示「編號 + 目錄名」，其他 window 只顯示編號**，以顏色表示狀態：
+*   所有 window 連成一條以斜線分段的長條，每個 window 是「編號 + 目錄名」兩段，**寬度夠時每個 window 都顯示目錄名**；編號的底色表示狀態（當前 window 為天藍）：
 
     | 狀態 | 顏色 | 觸發條件 |
     | :--- | :--- | :--- |
@@ -35,7 +34,7 @@
 
     優先級：`bell > @ready > activity > default`。切到該 window 時 `@ready` 會自動清除。
 *   視窗多、寬度不夠時依序自動退讓，不會蓋到左右兩側的資訊：
-    1.  其他 window 拿掉膠囊外框，只剩有顏色的編號
+    1.  只有當前 window 顯示目錄名，其他 window 只剩有顏色的編號
     2.  隱藏右側的 IP 位址
     3.  還是放不下就捲動，兩端以 `<` `>` 標示，當前 window 永遠在畫面內
 
@@ -83,11 +82,17 @@
 
 | Sub-key | Action |
 | :--- | :--- |
-| `oo` | zoom pane toggle |
-| `ok` | 開 kbu (fullscreen) |
-| `og` | 開 lazygit (fullscreen) |
-| `of` | 開 filu (fullscreen) |
-| `ow` | 開 webu (fullscreen) |
+| `oo` | zoom pane toggle；在工具的 popup 裡則是縮小工具 |
+| `ok` | 開 kbu (fullscreen)；縮小中則叫回 |
+| `og` | 開 lazygit (fullscreen)；縮小中則叫回 |
+| `of` | 開 filu (fullscreen)；縮小中則叫回 |
+| `ow` | 開 webu (fullscreen)；縮小中則叫回 |
+
+**o-mode 工具縮小**：`ok` / `og` / `of` / `ow` 開的工具，在 popup 裡按 `prefix o o` 就縮小，工具繼續在背景執行；再按一次同一個鍵叫回原本的畫面。在工具裡正常結束（例如 lazygit 按 `q`）才算真的關閉。
+
+*   每個 session 裡同一個工具只有一份，停在第一次開啟時的目錄；要換 repo，先在工具裡結束再重開
+*   縮小中的工具列在最右上那條 pane 標題列、git branch 的左邊，例如 `filu|lazygit`，熱鍵字母以藍色標示
+*   session 關閉時，它縮小中的工具一併結束
 
 **`prefix s` → s-mode（search）**
 

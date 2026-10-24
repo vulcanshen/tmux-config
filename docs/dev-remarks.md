@@ -23,16 +23,26 @@ tmux 端的任何推斷都是盲的，訊號必須由應用程式自己發出。
 
 - **只放 tmux 本身的資訊**：CPU、記憶體、電量、日期時間全部移除（macOS 選單列
   已有），左右兩側從約 70 欄縮到不到 30 欄
-- **只有當前 window 顯示名字**：12 個專案 window 的全名膠囊約需 166 欄，光外框
-  （兩個圓角 + 兩個空白）每個就佔 4 欄；名字放不下是常態，所以非當前 window
-  一律只顯示編號 + 燈號顏色，不再依寬度切換
-- **`status-justify centre`**：原本的 `absolute-centre` 會直接把 list 畫在左右
-  資訊之上（`format-draw.c`：「drawing them over the rest」），寬度不足就重疊；
-  `centre` 把 list 限制在左右之間，放不下時走 tmux 內建捲動（`<` `>` marker，
-  `list=focus` 保證當前 window 可見）。代價是置中基準變成左右之間的空白
+- **window 連成一條長條**：分開的膠囊光外框（兩個圓角 + 兩個空白 + 分隔）每個
+  就佔 5 欄。改成每個 window 一段編號、一段目錄名，換色處用一格斜線 `U+E0BC`
+  （前景色是左邊那段、背景色是右邊那段），開頭 `U+E0BA`、結尾 `U+E0BC`；帶目錄
+  的 window 每個省 3 欄，只有編號的省 2 欄
+- **寬度夠時每個 window 都顯示名字**，不夠時只剩當前 window 顯示
+- **`status-justify right`**：長條靠右貼著 IP。原本的 `absolute-centre` 會直接把
+  list 畫在左右資訊之上（`format-draw.c`：「drawing them over the rest」），寬度
+  不足就重疊；`centre` / `right` 把 list 限制在左右之間，放不下時走 tmux 內建捲動
+  （`<` `>` marker，`list=focus` 保證當前 window 可見）
 
-寬度不足時的退讓順序：膠囊編號 → 拿掉外框的編號（每個省 2 欄）→ 隱藏 IP →
-捲動。判斷式 `@status_caps_fit` / `@status_ip_fit` 用 `#{w:#{W:...}}` 以佔位字元
+斜線要知道前一個 window 最後一段的顏色，但 window 的 format 看不到相鄰的 window。
+`@status_prev_tail` 是一個範本，`#{E:#{s|XX|#I|:@status_prev_tail}}` 先把 `XX`
+換成自己的編號，再展開範本：`s` 的替換字串是在外層（這個 window）展開的，範本裡
+的 `#{W:}` 迴圈因此能挑出「編號減 1」的那個 window，取它最後一段的顏色。這依賴
+`renumber-windows on` 讓編號連續。相鄰兩個 window 同色時（兩個只有編號的灰色
+window），實心斜線會看不見，改用細斜線 `U+E0BB`。
+
+寬度不足時的退讓順序：所有名字 → 只有當前名字 → 隱藏 IP → 捲動。連成長條後，
+只有編號的 window 每個佔 2 欄，跟原本「拿掉外框的編號」一樣窄，那一層退讓就拿掉了。
+判斷式 `@status_names_fit` / `@status_ip_fit` 用 `#{w:#{W:...}}` 以佔位字元
 估算列表寬度，加上 status-left 與 IP 的寬度，跟 `client_width` 比較：
 
 - 估算不直接量 `window-status-format`（它引用了判斷式本身，會自我遞迴）
@@ -42,7 +52,7 @@ tmux 端的任何推斷都是盲的，訊號必須由應用程式自己發出。
   裡的 `#{primary_ip}`，別處量不到，在 status-right 裡量自己又會遞迴
 - **坑**：巢狀 `#{W:}` 迴圈裡不能用 `loop_last_flag` — 外層跑到最後一個 window
   時，內層每一輪都會讀到 1，最後一個 window 的判斷因此跟其他 window 不同。
-  估算一律每個 window 算一格分隔（多估 1 欄）
+  結尾斜線改用 `window_end_flag` 判斷，它是 window 自己的屬性，不受迴圈影響
 - 任何估算誤差的最壞結果都是提早或延後進入捲動，不會重疊
 
 否決過：
@@ -54,6 +64,10 @@ tmux 端的任何推斷都是盲的，訊號必須由應用程式自己發出。
   佔寬；popup 版是 modal，無法常駐
 - 保留 absolute-centre 的混合模式：要整段複製 tmux 預設的 `status-format[0]`
   只為改 `align=`，tmux 升級時容易脫節
+- 長條的其他收邊字元：開頭用三角 `U+E0B2`、交界用圓角 `U+E0B4`（一串凸起，不順）、
+  梯形 `U+E0D2` / `U+E0D4`、像素 `U+E0C4`，以及編號左右用不同字元的組合；斜線雖然
+  有角，但最簡潔。預覽各種組合時，在 pane 裡印出真彩色的樣本比較快（Claude Code
+  的畫面顯示不出 Nerd Fonts 的私用區字元）
 
 ### 驗證方式：用巢狀 tmux 實際渲染狀態列
 
@@ -195,3 +209,70 @@ session 時，picker 就會莫名彈出來。
 
 **坑**：`set-hook -g <hook> …` 不指定位置時，會把該 hook 整組換掉。locku 的補鎖 hook
 掛在 `[90]`，這裡的 hook 用固定位置 `[10]`，不論載入順序都不會互相覆蓋。
+`session-closed` 也一樣：`[5]` 是 o-mode 工具的收尾（見下一節），`[10]` 是 picker。
+改用固定位置時，執行中的 server 會留著舊的 `[0]`，要 `set-hook -gu "session-closed[0]"`
+拿掉，不然 picker 會跑兩次。
+
+## o-mode 工具的縮小：popup 只是接到隱藏的 session
+
+popup 關掉時，裡面的程式就跟著結束。tmux 沒有「藏起 popup」的指令；3.7 的浮動 pane
+目前也只能建立，沒有隱藏與顯示。所以工具改在隱藏的 session 裡執行，popup 只負責
+attach 過去（`scripts/o-popup.sh`）：
+
+- session 名稱是 `_o<session id 的數字>_<工具>`，每個 session 每個工具一份。建立時
+  設 `status off`、`detach-on-destroy on`、`pane-border-status off`
+- popup 裡執行 `env -u TMUX tmux -S <socket> -T RGB attach -f active-pane`：
+  - 拿掉 `TMUX`，否則 attach 會被當成巢狀而拒絕
+  - popup 的終端是 `tmux-256color`，沒有 RGB，工具的顏色會掉成 256 色
+  - `active-pane` 在只有一個 pane 的 session 裡沒有作用，只用來標記「這是 popup 的 client」
+- 縮小（`prefix o o`）就是 `detach-client`：attach 結束、popup 關閉，工具留在背景。
+  工具正常結束時 session 跟著結束，`detach-on-destroy on` 讓 popup 的 client 離開，
+  popup 也就關了；沒有這個設定，client 會被移到別的 session，變成 popup 裡又套一層 tmux
+- popup 關閉後，腳本檢查隱藏 session 還在不在；還在就在所屬 session 設 `@o_<工具>`，
+  pane 標題列據此顯示
+- `prefix o o` 看 client 所在的 session 決定行為：在隱藏 session 裡就縮小，其他地方
+  照舊 zoom。用 `prefix (` `)` 切進隱藏 session 的 client 有 `client_last_session`，
+  改為切回去，而不是 detach 離開 tmux
+
+收尾（`session-closed[5]` 執行 `o-popup.sh --gc`）：
+
+- 所屬 session 關掉時，結束它的隱藏 session；工具在背景自己結束時，拿掉留下的標記
+- client 所在的 session 被關掉時，tmux 會把它移到最近用過的 session，可能正是隱藏
+  session。收尾先把這種 client（沒有 `active-pane` 標記）移到工具所屬的 session，
+  所屬 session 也不在了就移到最近用過的其他 session，然後才結束隱藏 session；
+  順序反過來，client 會跟著被 detach 離開 tmux
+- 收尾必須排在 picker 的 hook（`[10]`）之前，而且要等它跑完（不加 `-b`）：picker 的
+  hook 會一直等使用者選完，排在後面的收尾就跑不到
+- 移動 client 會觸發 `client-session-changed`，被當成正常切換而清掉 `@session_lost`，
+  收尾移完要補回去，失去 session 時 picker 才會照常彈出
+- vulcanzsh 的 session picker 列表與「剩幾個 session」的計數，都要排除 `_o` 開頭的
+  session，兩個 repo 要一起更新
+
+**坑**：`set -t "=name"` 會回報找不到 session（`has-session -t "=name"` 卻可以）；
+選項與 `send-keys` 的目標要寫成 `=name:`。
+
+縮小鍵否決過：
+
+- 單按 `Esc`：filu、kbu、webu、lazygit 都用 `Esc` 退回上一層
+- `prefix Esc`：按了 prefix 想取消時習慣按 `Esc`，會變成誤觸
+- 連按兩下 `Esc`：想快速退兩層時會誤觸
+
+標記的樣式：放在最右上那條 pane 標題列、branch 的左邊，往左延伸。它就在狀態列的
+window 長條正下方，用同樣的斜線長條會看混，所以只用文字：熱鍵字母藍色加粗，其他
+字母 `subtext0`，工具之間的 `|` 用 `overlay0`。試過並否決的：crust 底（跟終端機
+背景同色，看不出來）、每個工具一顆圓角小膠囊、斜線長條。
+
+已知限制：
+
+- 工具停在第一次開啟時的目錄
+- 窄 pane 裡左邊的目錄會蓋住右邊標題的開頭；原本目錄和 branch 就會互相重疊，
+  標記只是讓右邊那段變長，比較早碰到
+
+### 驗證方式：巢狀 tmux 裡按真的鍵
+
+用「狀態列與膠囊列的版面」一節的巢狀 tmux，對外層 `send-keys` 送 `` ` `` `o` `g`，
+就是在內層 client 按下 `prefix o g`；`capture-pane` 外層看 popup，`list-sessions`、
+`show -t <session> @o_lazygit` 看狀態。要測的情境：開啟、縮小、叫回（狀態保留）、
+在工具裡結束、別的 session 被關、所屬 session 被關、從 `prefix )` 切進隱藏 session。
+`sim.conf` 每次由測試腳本產生，暫存目錄被清掉時才不會讓內層 tmux 不載設定、
+按鍵全部沒有作用。

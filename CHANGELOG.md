@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-10-24
+
+- **o-mode 工具可以縮小**：`prefix o k` / `g` / `f` / `w` 開的工具，在 popup 裡按 `prefix o o` 縮小，工具繼續在背景執行
+  - 再按一次同一個鍵叫回原本的畫面；在工具裡正常結束（例如 lazygit 按 `q`）才真的關閉
+  - 縮小中的工具列在最右上那條 pane 標題列、git branch 的左邊，例如 `filu|lazygit`，熱鍵字母以藍色標示
+  - 每個 session 裡同一個工具一份；session 關閉時一併結束
+  - `prefix o o` 在其他地方照舊是 zoom
+  - 需要同時更新 vulcanzsh 的 `modules/tmux-workflow.zsh`（session picker 不列出背景執行的工具）
+
+## 2026-10-21
+
+- **視窗列表連成一整條**：所有 window 以斜線分段連在一起，靠右貼著 IP，更省寬度
+  - 寬度夠時每個 window 都顯示目錄名，不夠時只有當前 window 顯示
+  - 退讓順序改為：只留當前 window 的目錄名 → 隱藏 IP → 捲動
+
 ## 2026-10-16
 
 - **popup 的框不再被吃掉**：狀態列在上方時，pane 持續重畫（例如 Claude Code 的側邊欄動畫）會蓋掉 popup 的上邊框
