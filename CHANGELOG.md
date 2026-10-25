@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-25
+
+- **第 10 個以後的 window 用字母切換**：`prefix a`、`b`、`c`… 依序對應第 10、11、12… 個 window（跳過 prefix 底下已有用途的字母），狀態列上也顯示該字母
+  - 小寫 `a b c d e g h j k u w x y` 之後接大寫 `A B D F G J K M N O P Q R S T V W X Y Z`
+  - 按到不存在的 window 時，畫面中央跳出提示（1.5 秒或按任意鍵關閉）
+- **View mode 改成兩段式**：`prefix v` 進入，之後 `u` `d` `k` `j` `G` `gg` 移動，`q` / `Esc` 離開
+  - 新增 `v` 整行選取、`y` 複製；Claude Code 這類全螢幕程式的畫面也能選取
+  - 原本的 `prefix u/d/k/j/G/g g` 與 `prefix c`（copy mode）移除，騰出的字母給 window 用
+
 ## 2026-10-24
 
 - **o-mode 工具可以縮小**：`prefix o k` / `g` / `f` / `w` 開的工具，在 popup 裡按 `prefix o o` 縮小，工具繼續在背景執行

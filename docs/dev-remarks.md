@@ -276,3 +276,37 @@ window 長條正下方，用同樣的斜線長條會看混，所以只用文字�
 在工具裡結束、別的 session 被關、所屬 session 被關、從 `prefix )` 切進隱藏 session。
 `sim.conf` 每次由測試腳本產生，暫存目錄被清掉時才不會讓內層 tmux 不載設定、
 按鍵全部沒有作用。
+
+## window 熱鍵：第 10 個以後用字母
+
+tmux 預設的 `prefix 0`～`9` 一按就切換，不會等第二個數字，第 10 個 window 永遠到不了。
+第 10 個以後改用字母，順序是小寫、再大寫，跳過 prefix 底下已有用途的字母：
+
+- 字母清單只有一份：`@win_keys`。載入設定時 `scripts/window-keys.sh` 依序把 `0`～`9`
+  與清單裡的字母綁到 window 0、1、2…，狀態列也從同一份清單取字母顯示
+- 清單是在決定當下照「沒有綁定」挑的；之後要把其中一個字母拿去綁別的功能，要從清單
+  拿掉，否則誰在 `tmux.conf` 裡比較後面，誰就蓋掉另一個
+- 狀態列的字母用 `#{=1:#{=-K:@win_keys}}` 取：先留最後 K 個字（K = 清單長度 −
+  (編號 − 10)），再取第一個。用正規表示式 `#{s/^.{N}(.).*/\1/:…}` 取不行，pattern 裡
+  的 `{` 會讓 format 解析失敗
+- 寬度估算也用同一個標籤（`@win_label`），字母只佔 1 欄
+- 不存在的 window：綁定先用 `#{W:#{?#{==:#{window_index},N},1,}}` 判斷，不存在就跳
+  `scripts/warn-popup.sh` 畫的紅框。框一樣畫在一列空白下方（見「popup 的框由 fzf 畫」），
+  1.5 秒或按任意鍵關閉；popup 會吃掉那個鍵，不會漏進 pane
+
+為了騰出字母：`prefix c`（copy mode）拿掉，copy mode 改從 view mode 進；View Mode 的
+`prefix u/d/k/j/G/g` 改成 `prefix v` 進入後再按。tmux 預設的 `f`（找 window）、`i`
+（顯示資訊）、`n`（下一個 window）、`z`（zoom）還留著。
+
+## View Mode：`prefix v` 之後的按鍵
+
+`prefix v` 只負責進入：全螢幕 TUI 只切到 `view` 按鍵表，一般 shell pane 同時進 copy
+mode。`view` 表裡的鍵用 `pane_in_mode` 判斷，而不是 `alternate_on`：
+
+- 在 copy mode 裡（shell pane，或 TUI 按了 `v` 之後）移動 tmux 的游標，其他時候把
+  PageUp、`M-k` 這類鍵送給 TUI 自己翻頁。用 `alternate_on` 判斷的話，TUI 進了 copy
+  mode 之後 `k` `j` 還是送 `M-k` `M-j`，copy mode 不認得，游標動不了
+- `v` 是整行選取（`select-line`）：view 表只有上下移動的鍵，逐字選取的起點只能是游標
+  所在的那一欄，實測複製出來只有零碎的幾個字
+- `view` 表沒綁的鍵（`h` `l` `w` `b`…），tmux 會離開這個表、改到 root 表重找；pane
+  在 copy mode 時就落到 copy-mode-vi，那裡的 `v` / `y` 是逐字選取與複製

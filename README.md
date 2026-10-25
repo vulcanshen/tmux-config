@@ -37,6 +37,14 @@
     1.  只有當前 window 顯示目錄名，其他 window 只剩有顏色的編號
     2.  隱藏右側的 IP 位址
     3.  還是放不下就捲動，兩端以 `<` `>` 標示，當前 window 永遠在畫面內
+*   第 1～9 個 window 用 `prefix 1`～`prefix 9` 切換；第 10 個以後改用字母，狀態列上也顯示該字母（取代 `10`、`11`）：
+
+    | window | 熱鍵 |
+    | :--- | :--- |
+    | 10～22 | `prefix a` `b` `c` `d` `e` `g` `h` `j` `k` `u` `w` `x` `y` |
+    | 23～42 | `prefix A` `B` `D` `F` `G` `J` `K` `M` `N` `O` `P` `Q` `R` `S` `T` `V` `W` `X` `Y` `Z` |
+
+    按到不存在的 window 時，畫面中央會跳出提示（1.5 秒或按任意鍵關閉）。
 
 ### Prefix 鍵
 
@@ -67,10 +75,8 @@
 | `prefix q` | 取消 prefix pending state |
 | `prefix H` | 前一個 window，並進入 `w-nav` mode 可連按（`q`/`Esc` 退出） |
 | `prefix L` | 下一個 window，並進入 `w-nav` mode 可連按 |
-| `prefix c` | 進入 copy mode (vi) |
-| `prefix u/d/k/j` | page up/down、上/下一行 + 進 view mode |
-| `prefix G` | 跳到最底 + 進 view mode |
-| `prefix g g` | 跳到最頂（vim gg） |
+| `prefix 1`～`9`、`prefix a` `b` `c`… | 切換 window（見「視窗顯示」） |
+| `prefix v` | 進入 view mode：翻頁、捲動、選取與複製（見下方「檢視模式」） |
 | `prefix :` | popup command line |
 | `prefix p` | prompt：在 pane 當前目錄執行 shell 指令（fire-and-forget；失敗時顯示錯誤提示） |
 | `prefix ?` | 顯示 keybinding 搜索 popup |
@@ -133,16 +139,22 @@
 | `rmw` | remove window |
 | `rmp` | remove pane |
 
-### 複製模式（Copy Mode）
+### 檢視模式（View Mode）
 
-`prefix + c` 進入 copy mode（vi 風格）：
+`prefix v` 進入 view mode，之後可以連按；`q` / `Esc` 離開，按其他鍵也會離開（該鍵照常送進 pane）：
 
 | 快捷鍵 | 功能 |
 | :--- | :--- |
-| `h/j/k/l` | 移動游標 |
-| `v` | 開始選取 |
-| `y` | 複製選取內容並退出 |
-| `prefix ]` | 貼上複製的內容 |
+| `u` / `d` | 上 / 下翻頁 |
+| `k` / `j` | 上 / 下一行 |
+| `G` / `gg` | 跳到最底 / 最頂 |
+| `v` | 從游標所在那一行開始整行選取，再用上面的鍵往上下延伸 |
+| `y` | 複製選取內容並離開 |
+
+*   Claude Code、nvim、less 這類全螢幕程式：翻頁鍵直接交給程式；按 `v` 時畫面才進入 tmux 的 copy mode，可以選取畫面上的字
+*   一般 shell pane：進入時就是 tmux 的 copy mode，捲動的是 scrollback；滑鼠滾輪往上捲也會進入 copy mode
+*   想逐字選取：按 `h` `l` `w` `b` 等鍵切到 tmux 原生的 copy mode（vi 風格），在那裡 `v` 開始選取、`y` 複製
+*   `prefix ]` 貼上複製的內容
 
 ### 其他設定
 
