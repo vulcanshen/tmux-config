@@ -292,7 +292,13 @@ tmux 預設的 `prefix 0`～`9` 一按就切換，不會等第二個數字，第
 - 寬度估算也用同一個標籤（`@win_label`），字母只佔 1 欄
 - 不存在的 window：綁定先用 `#{W:#{?#{==:#{window_index},N},1,}}` 判斷，不存在就跳
   `scripts/warn-popup.sh` 畫的紅框。框一樣畫在一列空白下方（見「popup 的框由 fzf 畫」），
-  1.5 秒或按任意鍵關閉；popup 會吃掉那個鍵，不會漏進 pane
+  1.5 秒後自動關閉
+- 提示框不能擋住下一個按鍵：popup 開著時鍵盤一定歸它，`display-popup` 沒有不搶按鍵的
+  選項。所以框收到按鍵就關閉並轉交：prefix 用 `switch-client -T prefix` 讓 client 直接
+  進 prefix 表，`Esc` / `C-c` 只關閉，其他鍵用 `send-keys -l` 送進 client 當下的 pane。
+  方向鍵這類多位元組的鍵只讀到第一個位元組（`Esc`），只會關閉
+- 轉交要知道是哪個 client，但 popup 的 `-E` 指令不展開 format；綁定改成先 `run-shell -b`
+  （會展開 `#{client_name}`），再由腳本 `display-popup -c <client>`
 
 為了騰出字母：`prefix c`（copy mode）拿掉，copy mode 改從 view mode 進；View Mode 的
 `prefix u/d/k/j/G/g` 改成 `prefix v` 進入後再按。tmux 預設的 `f`（找 window）、`i`

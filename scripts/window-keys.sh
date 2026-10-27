@@ -4,8 +4,7 @@
 #   window-keys.sh <letters for windows 10 and up>
 i=0
 for k in $(printf '%s' "0123456789$1" | sed 's/./& /g'); do
-  msg="No window $k"
   tmux bind "$k" if -F "#{W:#{?#{==:#{window_index},$i},1,}}" "select-window -t :=$i" \
-    "display-popup -B -w $((${#msg} + 6)) -h 4 -x C -y C -E \"~/.config/tmux/scripts/warn-popup.sh '$msg'\""
+    "run-shell -b \"~/.config/tmux/scripts/warn-popup.sh '#{client_name}' 'No window $k'\""
   i=$((i + 1))
 done
