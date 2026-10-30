@@ -229,7 +229,7 @@ attach 過去（`scripts/o-popup.sh`）：
   工具正常結束時 session 跟著結束，`detach-on-destroy on` 讓 popup 的 client 離開，
   popup 也就關了；沒有這個設定，client 會被移到別的 session，變成 popup 裡又套一層 tmux
 - popup 關閉後，腳本檢查隱藏 session 還在不在；還在就在所屬 session 設 `@o_<工具>`，
-  pane 標題列據此顯示
+  狀態列左段據此顯示
 - `prefix o o` 看 client 所在的 session 決定行為：在隱藏 session 裡就縮小，其他地方
   照舊 zoom。用 `prefix (` `)` 切進隱藏 session 的 client 有 `client_last_session`，
   改為切回去，而不是 detach 離開 tmux
@@ -257,16 +257,13 @@ attach 過去（`scripts/o-popup.sh`）：
 - `prefix Esc`：按了 prefix 想取消時習慣按 `Esc`，會變成誤觸
 - 連按兩下 `Esc`：想快速退兩層時會誤觸
 
-標記的樣式：放在最右上那條 pane 標題列、branch 的左邊，往左延伸。它就在狀態列的
-window 長條正下方，用同樣的斜線長條會看混，所以只用文字：熱鍵字母藍色加粗，其他
-字母 `subtext0`，工具之間的 `|` 用 `overlay0`。試過並否決的：crust 底（跟終端機
-背景同色，看不出來）、每個工具一顆圓角小膠囊、斜線長條。
+標記的樣式：放在狀態列左段、mode 提示之後（`@o_chips`），每個工具一顆 `base` 底的
+圓角膠囊，膠囊之間空一格；熱鍵字母藍色加粗，其他字母 `subtext0`。一開始放在最右上
+那條 pane 標題列、branch 的左邊，但那裡就在 window 長條正下方，樣式接近時容易看混；
+在那個位置試過斜線長條、crust 底的純文字（跟終端機背景同色，看不出來）、`|` 分隔的
+純文字，最後移到左上角。
 
-已知限制：
-
-- 工具停在第一次開啟時的目錄
-- 窄 pane 裡左邊的目錄會蓋住右邊標題的開頭；原本目錄和 branch 就會互相重疊，
-  標記只是讓右邊那段變長，比較早碰到
+已知限制：工具停在第一次開啟時的目錄。
 
 ### 驗證方式：巢狀 tmux 裡按真的鍵
 
