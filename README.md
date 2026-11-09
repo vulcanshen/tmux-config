@@ -42,7 +42,7 @@
     | window | 熱鍵 |
     | :--- | :--- |
     | 10～22 | `prefix a` `b` `c` `d` `e` `g` `h` `j` `k` `u` `w` `x` `y` |
-    | 23～42 | `prefix A` `B` `D` `F` `G` `J` `K` `M` `N` `O` `P` `Q` `R` `S` `T` `V` `W` `X` `Y` `Z` |
+    | 23～40 | `prefix A` `B` `D` `F` `G` `M` `N` `O` `P` `Q` `R` `S` `T` `V` `W` `X` `Y` `Z` |
 
     按到不存在的 window 時，畫面中央會跳出提示，1.5 秒後自動消失。提示不會擋住下一個按鍵：直接按 prefix 接著切 window、繼續打字都可以（按鍵會關掉提示並照常生效），`Esc` 只關閉提示。
 
@@ -75,6 +75,8 @@
 | `prefix q` | 取消 prefix pending state |
 | `prefix H` | 前一個 window，並進入 `w-nav` mode 可連按（`q`/`Esc` 退出） |
 | `prefix L` | 下一個 window，並進入 `w-nav` mode 可連按 |
+| `prefix J` | 下一個 session（照名稱排序，跳過縮小中工具的背景 session），並進入 `w-nav` mode 可連按 |
+| `prefix K` | 上一個 session，並進入 `w-nav` mode 可連按；在 `w-nav` 裡 `H` `L` `J` `K` 可以混著按 |
 | `prefix 1`～`9`、`prefix a` `b` `c`… | 切換 window（見「視窗顯示」） |
 | `prefix v` | 進入 view mode：翻頁、捲動、選取與複製（見下方「檢視模式」） |
 | `prefix :` | popup command line |

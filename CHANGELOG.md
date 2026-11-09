@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-09
+
+- **`prefix J` / `prefix K` 切換 session**：下一個 / 上一個 session（照名稱排序，到頭繞回），不必再開 session 清單
+  - 按完會進 `w-nav` 可以連按，跟切 window 的 `H` / `L` 混著按也可以
+  - 縮小中工具的背景 session 會跳過
+  - `J` `K` 原本排給第 28、29 個 window，改用切換 session 後，大寫字母改為 `A B D F G M N O P Q R S T V W X Y Z`（第 23～40 個）
+
 ## 2026-10-30
 
 - **縮小中的 o-mode 工具移到左上角**：顯示在狀態列 session 名稱的後面，每個工具一顆深色圓角膠囊（原本在最右上 pane 標題列、git branch 的左邊）

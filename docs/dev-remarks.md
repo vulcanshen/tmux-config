@@ -282,7 +282,8 @@ tmux 預設的 `prefix 0`～`9` 一按就切換，不會等第二個數字，第
 - 字母清單只有一份：`@win_keys`。載入設定時 `scripts/window-keys.sh` 依序把 `0`～`9`
   與清單裡的字母綁到 window 0、1、2…，狀態列也從同一份清單取字母顯示
 - 清單是在決定當下照「沒有綁定」挑的；之後要把其中一個字母拿去綁別的功能，要從清單
-  拿掉，否則誰在 `tmux.conf` 裡比較後面，誰就蓋掉另一個
+  拿掉，否則誰在 `tmux.conf` 裡比較後面，誰就蓋掉另一個（`J` `K` 改成切換 session 時
+  就是這樣從清單拿掉的）
 - 狀態列的字母用 `#{=1:#{=-K:@win_keys}}` 取：先留最後 K 個字（K = 清單長度 −
   (編號 − 10)），再取第一個。用正規表示式 `#{s/^.{N}(.).*/\1/:…}` 取不行，pattern 裡
   的 `{` 會讓 format 解析失敗
@@ -313,3 +314,16 @@ mode。`view` 表裡的鍵用 `pane_in_mode` 判斷，而不是 `alternate_on`�
   所在的那一欄，實測複製出來只有零碎的幾個字
 - `view` 表沒綁的鍵（`h` `l` `w` `b`…），tmux 會離開這個表、改到 root 表重找；pane
   在 copy mode 時就落到 copy-mode-vi，那裡的 `v` / `y` 是逐字選取與複製
+
+## session 切換：`prefix J` / `K`
+
+跟 `prefix H` / `L` 一樣按完進 `w-nav`，四個鍵可以混著連按。不用 tmux 內建的
+`switch-client -n` / `-p`：它們照名稱排序依序經過每個 session，包括 o-mode 工具的
+隱藏 session（`_o…`，`_` 排在小寫字母前面）。`scripts/session-nav.sh` 改成從
+`list-sessions`（同樣是名稱排序）濾掉隱藏 session，再挑下一個或上一個，頭尾繞回。
+
+**坑**：要查 client 在哪個 session，不能用 `display -p -c <client> '#{session_name}'`，
+`-c` 只決定訊息顯示在哪個 client，`#{session_name}` 取的是另一個預設目標，連按時會停在
+原地或跳錯方向；改用 `list-clients -F '#{client_name} #{client_session}'` 查。
+
+tmux 預設的 `prefix (` / `)` 還在，仍會切進隱藏 session（見 o-mode 一節的處理）。
