@@ -43,17 +43,44 @@ fi
 name=$1 parent=$2 dir=$3 client=$4 cmd=$5
 hidden="_o${parent#\$}_$name"
 if ! tmux has-session -t "=$hidden" 2>/dev/null; then
+  # No idle lock of its own: its activity is passed on to the session behind the popup, which does the locking
   tmux new-session -d -s "$hidden" -c "$dir" "$cmd" \; \
     set -t "=$hidden:" status off \; \
     set -t "=$hidden:" detach-on-destroy on \; \
+    set -t "=$hidden:" lock-after-time 0 \; \
     set -w -t "=$hidden:" pane-border-status off
 fi
 tmux set -t "$parent" -u "@o_$name"
+
+# Keys typed in the popup count as activity only for the hidden session, so the session behind it would reach
+# lock-after-time while the tool is in use. While the popup is open, whenever the hidden session has seen keys,
+# switch the client to the session it is already on: tmux counts that as activity and nothing changes on screen.
+# The switch runs the client-session-changed hooks, so the lost-session mark for the picker is put back after it
+idle=$(tmux display -p -t "$parent" '#{lock-after-time}')
+if [ "${idle:-0}" -gt 0 ]; then
+  every=$((idle / 2))
+  [ "$every" -gt 30 ] && every=30
+  [ "$every" -lt 1 ] && every=1
+  (
+    last=$(tmux display -p -t "=$hidden:" '#{session_activity}')
+    while sleep "$every"; do
+      now=$(tmux display -p -t "=$hidden:" '#{session_activity}') || exit
+      [ "$now" = "$last" ] && continue
+      last=$now
+      lost=$(tmux show -gqv @session_lost)
+      tmux switch-client -c "$client" -t "$parent"
+      if [ -n "$lost" ]; then tmux set -g @session_lost "$lost"; else tmux set -gu @session_lost; fi
+    done
+  ) > /dev/null 2>&1 &
+  watcher=$!
+fi
+
 # TMUX is unset so the attach is not refused as nested; the popup's terminal is tmux-256color, so ask for RGB.
 # active-pane changes nothing in a one-pane session, it only tags the popup's client for --gc
 sock=$(tmux display -p '#{socket_path}')
 tmux display-popup -c "$client" -b rounded -w 100% -h 100% -S "fg=#89b4fa" \
   -E "env -u TMUX tmux -S '$sock' -T RGB attach -f active-pane -t '=$hidden'"
+[ -n "$watcher" ] && kill "$watcher" 2>/dev/null
 # The popup is closed: the tool is hidden if its session is still there
 if tmux has-session -t "=$hidden" 2>/dev/null; then
   tmux set -t "$parent" "@o_$name" 1
