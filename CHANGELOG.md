@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-18
+
+- **`prefix o t` 開 tetru**：跟其他 o-mode 工具一樣全螢幕開啟，`prefix o o` 可以縮小
+- **o-mode 工具使用中不再被閒置鎖定**：在工具（tetru、lazygit 等）裡持續操作時，locku 不會因為「閒置」而鎖住畫面；開著不碰，照樣在閒置時間到時鎖定
+
 ## 2026-11-09
 
 - **`prefix J` / `prefix K` 切換 session**：下一個 / 上一個 session（照名稱排序，到頭繞回），不必再開 session 清單

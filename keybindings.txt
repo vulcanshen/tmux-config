@@ -22,6 +22,7 @@ prefix o k          o-mode  open kbu (fullscreen), or bring it back / 開 kbu (f
 prefix o g          o-mode  open lazygit (fullscreen), or bring it back / 開 lazygit (fullscreen)，縮小中則叫回
 prefix o f          o-mode  open filu (fullscreen), or bring it back / 開 filu (fullscreen)，縮小中則叫回
 prefix o w          o-mode  open webu (fullscreen), or bring it back / 開 webu (fullscreen)，縮小中則叫回
+prefix o t          o-mode  open tetru (fullscreen), or bring it back / 開 tetru (fullscreen)，縮小中則叫回
 prefix s w          s-mode  search window picker / search window picker
 prefix s s          s-mode  search session picker / search session picker（含「New Session」選項）
 prefix m i          m-mode  move in (merge pane into window) / move in（合併 pane 到指定 window）

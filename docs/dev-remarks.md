@@ -251,6 +251,31 @@ attach 過去（`scripts/o-popup.sh`）：
 **坑**：`set -t "=name"` 會回報找不到 session（`has-session -t "=name"` 卻可以）；
 選項與 `send-keys` 的目標要寫成 `=name:`。
 
+閒置鎖定（locku 用的 `lock-after-time`）以 session 為單位計時，只有 client 收到的按鍵
+才算活動。popup 開著時鍵盤直接送進 popup，tmux 不把這些按鍵記成背後 session 的活動；
+o-mode 工具又跑在隱藏 session 裡，按鍵只更新隱藏 session。結果是一邊玩 tetru 一邊被鎖。
+（工具直接跑在 popup 裡的舊做法也一樣，只是 fzf 那類 popup 開幾秒就關，碰不到門檻。）
+
+- popup 開著時，`o-popup.sh` 背景跑一個監看：隱藏 session 的 `session_activity` 有變，
+  就 `switch-client -c <client> -t <它原本的 session>`。切到同一個 session 畫面不變，
+  `client_last_session` 也不變，但 tmux 會更新該 session 的活動時間
+- 間隔是 `lock-after-time` 的一半、最多 30 秒；`lock-after-time` 為 0 就不監看
+- 這個切換會跑 `client-session-changed` 的 hook：從沒切換過 session 的 client，
+  `client_last_session` 為空，會被誤標成「失去 session」，所以切完把 `@session_lost`
+  還原成切換前的值；locku 的 `[90]` hook 只在已鎖定時動作，不受影響
+- 隱藏 session 設 `lock-after-time 0`：活動已轉給背後的 session，由它負責鎖定；
+  不關的話，在 popup 裡閒置時兩個 session 各鎖一次，popup 裡會多一個鎖定畫面
+- 只轉「有按鍵」這件事，工具自己在畫面上動不算，人走開照樣會鎖
+
+否決過：
+
+- 定時對背後的 session `send-keys` 一個 Enter：`send-keys` 不算活動（實測活動時間
+  沒變）；Enter 會真的送進 pane，Claude Code 輸入框裡打到一半的字會被送出；定時送也
+  等於 popup 開著就永遠不鎖
+- 讓 popup 的 client 接在背後的 session、工具當成那個 session 的一個 window：同一個
+  session 的 client 共用當前 window，工具的 window 會出現在 window 長條、`H` / `L` 與
+  字母熱鍵裡，同 session 的其他終端機也會跟著切過去
+
 縮小鍵否決過：
 
 - 單按 `Esc`：filu、kbu、webu、lazygit 都用 `Esc` 退回上一層
