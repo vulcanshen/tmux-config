@@ -352,3 +352,18 @@ mode。`view` 表裡的鍵用 `pane_in_mode` 判斷，而不是 `alternate_on`�
 原地或跳錯方向；改用 `list-clients -F '#{client_name} #{client_session}'` 查。
 
 tmux 預設的 `prefix (` / `)` 還在，仍會切進隱藏 session（見 o-mode 一節的處理）。
+
+## tmux 3.8 的內建主題
+
+3.8 新增內建的淺色／深色主題（`theme` 選項，預設 `detect`），並把許多樣式的預設值改成
+主題色：`popup-style`、`menu-style`、`menu-border-style` 都變成 `bg=themedarkgrey`，
+`fill-character` 在 window 裡沒被 pane 占用的區域也填深灰底，copy mode 的選取與搜尋
+高亮改用主題的黃、青、洋紅。升級後 popup、選單都多了一塊 `#262626` 的底。
+
+- `theme terminal`：主題色名稱改用終端機自己的 ANSI 顏色，高亮回到 3.7 的顏色
+- 只設 `theme terminal` 不夠：`themedarkgrey` 會變成 ANSI 黑，在 Catppuccin 配色裡是
+  一塊灰（`#45475a`），跟 Ghostty 背景（`#11111b`）不同，所以 `popup-style`、
+  `menu-style`、`menu-border-style` 要另外改回 `default`
+- `fill-character` 只拿掉 window 裡的底色，window 外的區域保留 3.8 的 `~` 標示
+- `theme` 用 `set -gq`：沒有這個選項的舊版 tmux 不會報錯
+- 狀態列、訊息列、pane 邊框、popup 邊框本來就在設定裡指定了顏色，不受影響
