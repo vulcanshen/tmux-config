@@ -2,20 +2,68 @@
 
 README 只放使用者需要知道的；運作機制、設計決定與理由放這裡。
 
-## 視窗標籤的 `@ready` 綠燈：為什麼不用 `monitor-silence`
+## 視窗標籤的顏色：為什麼有 Claude Code 的 window 不看 tmux 的 activity / silence
 
-tmux 內建的 `monitor-silence` 靠 tty 輸出停頓判斷「做完了」，但 spinner 型 TUI
-（Claude Code、k9s 等）會持續寫 tty 畫動畫，silence 永遠不會觸發 — 對這類程式
-tmux 端的任何推斷都是盲的，訊號必須由應用程式自己發出。
+tmux 的橘色原本是 `window_activity_flag && !window_silence_flag`，對 Claude Code 兩頭都不準：
 
-因此「Claude 等你」的訊號改由 Claude Code 的 `Stop` / `Notification` hook 主動
-打上 window 的 `@ready=on`（`claude-hooks/mark-ready.sh`），tmux 端只負責顯示與清除：
+- **activity 是「上次看過之後 pane 有任何輸出」**，不是「正在跑」。閒著的 Claude Code
+  也會輸出：statusline 每 `refreshInterval` 秒重畫（這台設 2 秒）、終端機標題、通知。
+  單一 pane 每次重畫就閃橘 1 秒；一個 window 裡有好幾個 Claude，各自重畫的時間錯開，
+  永遠湊不滿 `monitor-silence` 的 1 秒，就一直是橘的
+- **silence 旗標一設上就不會自己消失**，要等那個 window 被切進去（`winlink_clear_flags`）
+  才清掉。3.8 實測：window 安靜滿 1 秒後再開始連續輸出，silence 仍是 1，顯示灰色。
+  所以「安靜過一次」之後真的開始跑也不會變橘
 
-- 優先級 `bell > @ready > activity > default` — `@ready` 高於 activity，
-  spinner 繼續寫 tty 也不會把綠燈蓋回橘色
-- `after-select-window` hook 在切到該 window 時自動清掉 `@ready`（看過即讀取）
-- silence 沒有獨立顏色：「活動後靜默」與「從未活動」是同一個終態
-  （都是「沒東西要看」），一律收斂到灰色
+因此有 Claude 的 window 改看 Claude Code 自己的 hooks（`claude-hooks/mark-ready.sh`），
+沒有 Claude 的 window 照舊用 activity / silence。
+
+### 兩個旗標
+
+- **pane 選項 `@cc`**：`run` / `idle`；有設就代表這個 pane 跑著 Claude。用 pane 而不是
+  window 選項，是因為一個 window 可能有好幾個 Claude。`@status_num_bg` 用 `#{P:}`
+  迴圈：任一 pane 是 `run` 就橘；有 `@cc` 但都不是 `run` 就灰，不再參考 activity
+- **window 選項 `@ready`**：`on` 時為綠，優先於橘
+
+| Claude Code 事件 | 動作 |
+| :--- | :--- |
+| `SessionStart` | `@cc idle` |
+| `UserPromptSubmit` | `@cc run` |
+| `PreToolUse` | `@cc run`；輸入帶 `agent_id`（subagent 呼叫的工具）時略過 |
+| `Stop`、`StopFailure` | `@cc idle`，並設 `@ready`（window 正顯示在畫面上時不設） |
+| `Notification` | `notification_type` 是要你回答的類型時設 `@ready`（同上） |
+| `SessionEnd` | 拿掉 `@cc`，pane 回到一般 window 的判斷 |
+
+- **畫面上的 window 不設 `@ready`**（`window_active && session_attached`）：當前 window
+  一律顯示天藍，綠燈被蓋住看不到，等你切走才露出來，變成「看過了切走還是綠」
+- **`Notification` 只收 `permission_prompt`、`worker_permission_prompt`、
+  `elicitation_dialog`、`elicitation_url_dialog`、`agent_needs_input`**：`idle_prompt`
+  是 `Stop` 之後閒置 60 秒的提醒，你在 60 秒內看過、切走，時間到又會變綠。
+  `auth_success`、額度相關等其他類型也不是在等你
+- **`PreToolUse` 略過 subagent**：背景 subagent 在主對話 `Stop` 之後還會繼續呼叫工具，
+  沒有對應的 `Stop` 把它改回 `idle`，會一直是橘的
+- **事件名稱從 stdin 的 JSON（`hook_event_name`）讀**，所有事件共用同一條指令，
+  `install.sh` 用指令字串判斷是否已安裝；用 `sed` 取欄位，不依賴 `jq`
+- Claude Code 會即時讀到 `settings.json` 的 hook 變更，已經在跑的 session 不用重開
+
+### 清除
+
+- **切進一個 window 就清掉它的 `@ready`**：掛在 `session-window-changed`（任何切 window
+  的方式都會觸發）與 `client-session-changed`（`J` / `K`、session 清單、`choose-tree`
+  換 session 時，落點 window 不經過 `select-window`）。兩個 hook 裡不帶 `-t` 的
+  `set -w`，對象就是該 session 的當前 window
+- **`Esc` 中斷沒有 hook**：`Stop` 在使用者中斷時不觸發，`StopFailure` 只在 API 錯誤時
+  觸發（翻 2.1.329 的事件清單確認過）。所以離開 window 時由 `scripts/cc-leave.sh`
+  檢查：`@cc` 是 `run`、但畫面上已經沒有 Claude 的工作列
+  （`✻ Precipitating… (1m 0s · ↓ 5.2k tokens)`，比對
+  `^(·|✢|✳|✶|✻|✽|\*) [^ ].*… \(`）就改成 `idle`
+  - 不在離開時一律清掉：送出 prompt 後馬上切走，Claude 還在想、還沒用到工具，
+    就會先變灰
+  - 不在切進去時清：中斷發生在你切進去之後
+  - Claude Code 改了工作列的格式時，比對不到就會清掉，最壞是瞄一眼後橘燈先熄，
+    等下一次 `PreToolUse` 再亮，不會卡在橘
+- 剛離開的 window：`session-window-changed` 裡是 `window_last_flag` 那個
+  （`#{W:#{?window_last_flag,#{window_id},}}`）；`client-session-changed` 裡是
+  前一個 session 的當前 window（`=#{client_last_session}:`）
 
 ## 狀態列與膠囊列的版面
 

@@ -25,14 +25,14 @@
 *   視窗索引從 1 開始
 *   所有 window 連成一條以斜線分段的長條，每個 window 是「編號 + 目錄名」兩段，**寬度夠時每個 window 都顯示目錄名**；編號的底色表示狀態（當前 window 為天藍）：
 
-    | 狀態 | 顏色 | 觸發條件 |
+    | 顏色 | 有 Claude Code 的 window | 其他 window |
     | :--- | :--- | :--- |
-    | Bell | 紅 | 收到 `^G`（terminal bell） |
-    | `@ready` | 綠 | Claude Code Stop / Notification hook 主動觸發（「Claude 講完話 / 等妳 input」） |
-    | Activity | 橘 | pane 有 tty 輸出、且未進入靜默 |
-    | Default | 灰 | 平靜狀態（沒動過 或 動完停下來了） |
+    | 紅 | 收到 `^G`（terminal bell） | 收到 `^G`（terminal bell） |
+    | 綠 | Claude 講完、或在等妳核准權限 / 回答問題 | — |
+    | 橘 | Claude 正在處理 | pane 有輸出、且還沒安靜下來 |
+    | 灰 | 其他時候 | 沒動過，或動完停下來了 |
 
-    優先級：`bell > @ready > activity > default`。切到該 window 時 `@ready` 會自動清除。
+    優先級：紅 > 綠 > 橘 > 灰。切進該 window 後綠色就會清除。Claude Code 的狀態要先裝好 hooks，見「[Claude Code 整合](#claude-code-整合)」。
 *   視窗多、寬度不夠時依序自動退讓，不會蓋到左右兩側的資訊：
     1.  只有當前 window 顯示目錄名，其他 window 只剩有顏色的編號
     2.  隱藏右側的 IP 位址
@@ -265,13 +265,18 @@ return {
 
 ## Claude Code 整合
 
-當 Claude Code 講完話或需要 input 時，讓對應的 tmux window tab 亮起綠色（`@ready` 狀態），即使妳在別的 window 也能一眼看到「Claude 在等妳」。
+window 標籤的顏色跟著 Claude Code 的狀態走：處理中是橘色，講完或在等妳回答時是綠色。即使妳在別的 window，也能一眼看出哪個 Claude 在忙、哪個在等妳。
+
+*   不管用什麼方式切進該 window（`H` / `L`、數字或字母鍵、`J` / `K`、session 清單），綠色都會清除；Claude 在妳正看著的 window 講完，不會變綠
+*   只有要妳核准權限或回答問題的通知會變綠，閒置 60 秒的提醒不會
+*   Claude 處理到一半按 `Esc` 中斷，切走後會轉回灰色
+*   有 Claude 的 window 只看 Claude 的狀態，閒著的 Claude 重畫畫面不會讓它變橘；其他 window 照舊看 pane 有沒有輸出
 
 腳本位於 `claude-hooks/`：
 
 | 檔案 | 用途 |
 | :--- | :--- |
-| `mark-ready.sh` | 由 Claude Code 的 `Stop` / `Notification` hook 呼叫，把當前 pane 的 window 打上 `@ready=on` |
+| `mark-ready.sh` | 由 Claude Code 的 hooks 呼叫，記錄每個 pane 的 Claude 是否在處理，講完或等妳回答時讓 window 變綠 |
 | `install.sh` | 安裝 hooks 到 `~/.claude/settings.json`（idempotent、寫 timestamped backup、非破壞性合併） |
 | `uninstall.sh` | 反向移除，只清這個 repo 的 hook entry |
 
@@ -281,9 +286,9 @@ return {
 ~/.config/tmux/claude-hooks/install.sh
 ```
 
-安裝後開新的 Claude Code session 生效。tmux 端已在 `tmux.conf` 內建好對應的 `window-status-format` 分支與 `after-select-window` 清 flag 機制，不需額外設定。
+安裝後立即生效，已經在跑的 Claude Code 也會套用。tmux 端的顏色與清除機制已內建在 `tmux.conf`，不需額外設定。
 
-> 設計緣由（為什麼不用 tmux 內建的 `monitor-silence`）見 [docs/dev-remarks.md](docs/dev-remarks.md)。
+> 設計緣由（為什麼不用 tmux 內建的 activity / silence 判斷）見 [docs/dev-remarks.md](docs/dev-remarks.md)。
 
 ## 螢幕鎖定（locku）
 

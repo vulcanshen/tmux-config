@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-20
+
+- **window 標籤的顏色改跟 Claude Code 的狀態走**：有 Claude 的 window，處理中是橘色，講完或在等妳核准、回答時是綠色；閒著的 Claude 不會再莫名變橘。沒有 Claude 的 window 照舊
+  - 看過、切走後不會再是綠色：在妳正看著的 window 講完不會變綠，閒置 60 秒的提醒不會變綠，用 `J` / `K` 或 session 清單切進去也會清掉
+  - 處理到一半按 `Esc` 中斷，切走後轉回灰色
+  - 要重跑一次 `claude-hooks/install.sh` 加上新的 hooks
+
 ## 2026-11-19
 
 - **升級 tmux 3.8 後維持原本的配色**：3.8 內建的配色主題讓 popup、選單多了深灰背景，copy mode 的高亮也換了顏色；現在改回沿用終端機的配色，popup 與選單沒有背景
