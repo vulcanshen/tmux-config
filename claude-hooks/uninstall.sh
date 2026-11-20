@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Remove the Stop / Notification hooks installed by install.sh.
+# Remove the hooks installed by install.sh.
 #
 # Only removes hook entries whose command matches this repo's mark-ready.sh
 # — other hooks in settings.json stay untouched. A timestamped backup is
@@ -27,7 +27,7 @@ data = json.loads(settings_path.read_text() or "{}")
 hooks = data.get("hooks", {})
 
 changed = False
-for event in ("Stop", "Notification"):
+for event in ("SessionStart", "UserPromptSubmit", "PreToolUse", "Stop", "StopFailure", "Notification", "SessionEnd"):
     entries = hooks.get(event)
     if not entries:
         continue

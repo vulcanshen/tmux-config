@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install Claude Code hooks that ping tmux when Claude finishes / needs input.
+# Install the Claude Code hooks that keep tmux informed of what Claude is doing (working, finished, waiting).
 #
 # Idempotent: running multiple times leaves settings.json in the same state.
 # Non-destructive: existing hooks / other settings are preserved; a timestamped
@@ -45,7 +45,7 @@ def ensure_event(event: str) -> None:
                 return  # already installed
     entries.append({"hooks": [{"type": "command", "command": command}]})
 
-for event in ("Stop", "Notification"):
+for event in ("SessionStart", "UserPromptSubmit", "PreToolUse", "Stop", "StopFailure", "Notification", "SessionEnd"):
     ensure_event(event)
 
 settings_path.write_text(json.dumps(data, indent=2) + "\n")
