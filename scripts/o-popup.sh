@@ -43,12 +43,23 @@ fi
 name=$1 parent=$2 dir=$3 client=$4 cmd=$5
 hidden="_o${parent#\$}_$name"
 if ! tmux has-session -t "=$hidden" 2>/dev/null; then
-  # No idle lock of its own: its activity is passed on to the session behind the popup, which does the locking
-  tmux new-session -d -s "$hidden" -c "$dir" "$cmd" \; \
+  # No idle lock of its own: its activity is passed on to the session behind the popup, which does the locking.
+  # The only client here is the one in the popup, which answers no colour queries: without a background of its own
+  # tmux has no answer to OSC 11, and without a palette it passes OSC 4 on to the popup and holds every later reply
+  # (OSC 11, DA1) until that times out (about 500ms). So the window gets the terminal's background and palette, set
+  # in the same command as the session so they are there before the tool's first query
+  set -- new-session -d -s "$hidden" -c "$dir" "$cmd" \; \
     set -t "=$hidden:" status off \; \
     set -t "=$hidden:" detach-on-destroy on \; \
     set -t "=$hidden:" lock-after-time 0 \; \
-    set -w -t "=$hidden:" pane-border-status off
+    set -w -t "=$hidden:" pane-border-status off \; \
+    set -w -t "=$hidden:" window-style "bg=$(tmux show -gv @term_bg)"
+  i=0
+  for colour in $(tmux show -gv @term_palette); do
+    set -- "$@" \; set -w -t "=$hidden:" "pane-colours[$i]" "$colour"
+    i=$((i + 1))
+  done
+  tmux "$@"
 fi
 tmux set -t "$parent" -u "@o_$name"
 

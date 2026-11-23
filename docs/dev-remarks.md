@@ -268,7 +268,8 @@ popup 關掉時，裡面的程式就跟著結束。tmux 沒有「藏起 popup」
 attach 過去（`scripts/o-popup.sh`）：
 
 - session 名稱是 `_o<session id 的數字>_<工具>`，每個 session 每個工具一份。建立時
-  設 `status off`、`detach-on-destroy on`、`pane-border-status off`
+  設 `status off`、`detach-on-destroy on`、`pane-border-status off`，以及終端機的底色與
+  色盤（見下方「顏色查詢」）
 - popup 裡執行 `env -u TMUX tmux -S <socket> -T RGB attach -f active-pane`：
   - 拿掉 `TMUX`，否則 attach 會被當成巢狀而拒絕
   - popup 的終端是 `tmux-256color`，沒有 RGB，工具的顏色會掉成 256 色
@@ -298,6 +299,22 @@ attach 過去（`scripts/o-popup.sh`）：
 
 **坑**：`set -t "=name"` 會回報找不到 session（`has-session -t "=name"` 卻可以）；
 選項與 `send-keys` 的目標要寫成 `=name:`。
+
+**顏色查詢**：工具查終端機的底色（OSC 11）或色盤（OSC 4）時，隱藏 session 唯一的 client
+是 popup 裡那個，而 popup 不回答任何顏色查詢：
+
+- 沒有底色可回：tmux 只能從 `window-style` 或 client 的終端機得知底色，兩者都沒有，
+  OSC 11 就沒有回答。gittu（terminu-go）因此退回用 Catppuccin Base `#1e1e2e` 當漸層
+  終點，淡到一半就接上終端機真正的底色，看起來一刀切開
+- 回答被拖住：沒有 `pane-colours` 時，tmux 把 OSC 4 轉給 client 等它回答，之後的回答
+  （OSC 11、DA1）都排在後面，等逾時（約 500ms）才送出；terminu-go 最多只等 300ms。
+  client 還沒接上時 tmux 會立刻回答，所以剛建立 session 就跑的探測測不出來，延後
+  0.5 秒再查才看得到
+- 因此建立隱藏 session 時，在同一條 tmux 指令裡設 `window-style bg=<@term_bg>` 與
+  `pane-colours[0..15]`（`@term_palette`），趕在工具第一次查詢之前。兩個值照
+  `ghostty +show-config` 抄，Ghostty 換主題時要跟著改
+- `display-popup -E` 直接跑的程式沒有 pane，tmux 不回它的 OSC 11，`popup-style` 設了
+  底色也一樣，只能由程式自己處理
 
 閒置鎖定（locku 用的 `lock-after-time`）以 session 為單位計時，只有 client 收到的按鍵
 才算活動。popup 開著時鍵盤直接送進 popup，tmux 不把這些按鍵記成背後 session 的活動；
@@ -346,6 +363,11 @@ o-mode 工具又跑在隱藏 session 裡，按鍵只更新隱藏 session。結�
 在工具裡結束、別的 session 被關、所屬 session 被關、從 `prefix )` 切進隱藏 session。
 `sim.conf` 每次由測試腳本產生，暫存目錄被清掉時才不會讓內層 tmux 不載設定、
 按鍵全部沒有作用。
+
+顏色查詢：外層 tmux 設 `window-style bg=#11111b` 代替 Ghostty 回答 OSC 11。工具指令
+換成 `script -q -k <log> gittu`，log 裡就有 gittu 實際收到的回答；或用一支送出 CPR、
+16 個 OSC 4、OSC 11、DA1 的探測腳本，延後 0.5 秒（等 popup 的 client 接上）再跑，
+看每段回答到達的時間。
 
 ## window 熱鍵：第 10 個以後用字母
 
