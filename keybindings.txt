@@ -19,7 +19,7 @@ prefix p            prompt: run shell command in pane's current dir / 在 pane �
 prefix l            lock all clients via locku / 鎖定畫面（locku 提供的 binding）
 prefix o o          o-mode  zoom pane toggle; in a tool's popup, hide the tool / zoom pane toggle；在工具的 popup 裡則縮小工具
 prefix o k          o-mode  open kbu (fullscreen), or bring it back / 開 kbu (fullscreen)，縮小中則叫回
-prefix o g          o-mode  open lazygit (fullscreen), or bring it back / 開 lazygit (fullscreen)，縮小中則叫回
+prefix o g          o-mode  open gittu (fullscreen), or bring it back / 開 gittu (fullscreen)，縮小中則叫回
 prefix o f          o-mode  open filu (fullscreen), or bring it back / 開 filu (fullscreen)，縮小中則叫回
 prefix o w          o-mode  open webu (fullscreen), or bring it back / 開 webu (fullscreen)，縮小中則叫回
 prefix o t          o-mode  open tetru (fullscreen), or bring it back / 開 tetru (fullscreen)，縮小中則叫回

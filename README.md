@@ -92,12 +92,12 @@
 | :--- | :--- |
 | `oo` | zoom pane toggle；在工具的 popup 裡則是縮小工具 |
 | `ok` | 開 kbu (fullscreen)；縮小中則叫回 |
-| `og` | 開 lazygit (fullscreen)；縮小中則叫回 |
+| `og` | 開 gittu (fullscreen)；縮小中則叫回 |
 | `of` | 開 filu (fullscreen)；縮小中則叫回 |
 | `ow` | 開 webu (fullscreen)；縮小中則叫回 |
 | `ot` | 開 tetru (fullscreen)；縮小中則叫回 |
 
-**o-mode 工具縮小**：`ok` / `og` / `of` / `ow` / `ot` 開的工具，在 popup 裡按 `prefix o o` 就縮小，工具繼續在背景執行；再按一次同一個鍵叫回原本的畫面。在工具裡正常結束（例如 lazygit 按 `q`）才算真的關閉。
+**o-mode 工具縮小**：`ok` / `og` / `of` / `ow` / `ot` 開的工具，在 popup 裡按 `prefix o o` 就縮小，工具繼續在背景執行；再按一次同一個鍵叫回原本的畫面。在工具裡正常結束（例如 gittu 按 `q`）才算真的關閉。
 
 *   每個 session 裡同一個工具只有一份，停在第一次開啟時的目錄；要換 repo，先在工具裡結束再重開
 *   縮小中的工具顯示在狀態列左上角、session 名稱後面，每個工具一顆深色圓角膠囊，熱鍵字母以藍色標示

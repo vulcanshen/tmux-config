@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-23
+
+- **`prefix o g` 改開 gittu**：取代 lazygit，一樣全螢幕開啟、`prefix o o` 縮小，左上角的縮小標記顯示 `gittu`
+
 ## 2026-11-20
 
 - **window 標籤的顏色改跟 Claude Code 的狀態走**：有 Claude 的 window，處理中是橘色，講完或在等妳核准、回答時是綠色；閒著的 Claude 不會再莫名變橘。沒有 Claude 的 window 照舊

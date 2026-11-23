@@ -342,7 +342,7 @@ o-mode 工具又跑在隱藏 session 裡，按鍵只更新隱藏 session。結�
 
 用「狀態列與膠囊列的版面」一節的巢狀 tmux，對外層 `send-keys` 送 `` ` `` `o` `g`，
 就是在內層 client 按下 `prefix o g`；`capture-pane` 外層看 popup，`list-sessions`、
-`show -t <session> @o_lazygit` 看狀態。要測的情境：開啟、縮小、叫回（狀態保留）、
+`show -t <session> @o_gittu` 看狀態。要測的情境：開啟、縮小、叫回（狀態保留）、
 在工具裡結束、別的 session 被關、所屬 session 被關、從 `prefix )` 切進隱藏 session。
 `sim.conf` 每次由測試腳本產生，暫存目錄被清掉時才不會讓內層 tmux 不載設定、
 按鍵全部沒有作用。
