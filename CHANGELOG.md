@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-24
+
+- **o-mode 工具裡按 `Esc` 不再慢半拍**：gittu 等工具在 popup 裡按 `Esc` 原本要等半秒才有反應，`Esc` 後面接著按的鍵還會被當成 Alt+那個鍵；現在跟一般 pane 一樣即時
+  - 工具開著時調整終端機大小，`Esc` 會再變慢；縮小再叫回就恢復
+
 ## 2026-11-23
 
 - **`prefix o g` 改開 gittu**：取代 lazygit，一樣全螢幕開啟、`prefix o o` 縮小，左上角的縮小標記顯示 `gittu`

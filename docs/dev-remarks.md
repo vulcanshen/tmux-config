@@ -270,7 +270,8 @@ attach 過去（`scripts/o-popup.sh`）：
 - session 名稱是 `_o<session id 的數字>_<工具>`，每個 session 每個工具一份。建立時
   設 `status off`、`detach-on-destroy on`、`pane-border-status off`，以及終端機的底色與
   色盤（見下方「顏色查詢」）
-- popup 裡執行 `env -u TMUX tmux -S <socket> -T RGB attach -f active-pane`：
+- popup 裡執行 `o-popup.sh --attach`：先替 popup 的 pty 填上像素尺寸（見下方「Esc 被拖住」），
+  再 `exec env -u TMUX tmux -S <socket> -T RGB attach -f active-pane`：
   - 拿掉 `TMUX`，否則 attach 會被當成巢狀而拒絕
   - popup 的終端是 `tmux-256color`，沒有 RGB，工具的顏色會掉成 256 色
   - `active-pane` 在只有一個 pane 的 session 裡沒有作用，只用來標記「這是 popup 的 client」
@@ -316,6 +317,28 @@ attach 過去（`scripts/o-popup.sh`）：
 - `display-popup -E` 直接跑的程式沒有 pane，tmux 不回它的 OSC 11，`popup-style` 設了
   底色也一樣，只能由程式自己處理
 
+**Esc 被拖住**：工具裡單按 `Esc` 要等 500ms 才有反應，其他鍵正常；500ms 內接著按別的鍵，
+會跟 `Esc` 合成 Alt+那個鍵送進工具。
+
+- tmux 收到單獨的 `\e` 時，要等一下看後面還有沒有字（`escape-time`，這裡是 0）；但這個
+  client 還有查詢沒得到回答時，至少等 500ms（`tty-keys.c`，debug log 裡是
+  `increasing delay (active query)`）
+- popup 的 pty 沒有像素尺寸（tmux 建 popup 時只設行列），popup 裡的 client 一 attach，
+  tmux 就送 `\e[18t\e[14t` 問它。popup 只回答 `18t`（行列），不回答 `14t`（像素）；而
+  `14t` 的等待沒有逾時，只有收到回答才會清掉，所以 popup 開多久就拖多久。
+  OSC 10 / 11 的等待則在 5 秒後逾時，跟這個無關
+- 所以 popup 先跑 `o-popup.sh --attach`：用 python3 照外層 client 的
+  `#{client_cell_width}`、`#{client_cell_height}` 乘上 popup 的行列，`TIOCSWINSZ` 填進
+  popup 的 pty，再 exec `tmux attach`。tmux 看到有像素尺寸就不問了。python 要開
+  `/dev/tty`：程式從 heredoc 讀進來，stdin 不是終端機
+- 外層 client 不知道 cell 大小（是 0）時不填，跟原本一樣會被拖住
+- popup 開著時終端機改變大小，tmux 用只有行列的尺寸重設 popup 的 pty，裡面的 client
+  重新讀到沒有像素，又送出 `14t`，`Esc` 又被拖住，直到縮小再叫回。要連這個一起處理，
+  得讓一個程式在 popup 開著的期間一直留著，自己接住尺寸變化、補上像素後再通知 tmux
+  client；為了偶爾才發生的情況多一個常駐行程，先不做
+- 修正前的 lazygit 與其他 o-mode 工具都一樣受影響；在一般 pane 裡沒有這個問題，pane
+  會回答 `14t`
+
 閒置鎖定（locku 用的 `lock-after-time`）以 session 為單位計時，只有 client 收到的按鍵
 才算活動。popup 開著時鍵盤直接送進 popup，tmux 不把這些按鍵記成背後 session 的活動；
 o-mode 工具又跑在隱藏 session 裡，按鍵只更新隱藏 session。結果是一邊玩 tetru 一邊被鎖。
@@ -353,7 +376,8 @@ o-mode 工具又跑在隱藏 session 裡，按鍵只更新隱藏 session。結�
 在那個位置試過斜線長條、crust 底的純文字（跟終端機背景同色，看不出來）、`|` 分隔的
 純文字，最後移到左上角。
 
-已知限制：工具停在第一次開啟時的目錄。
+已知限制：工具停在第一次開啟時的目錄；popup 開著時終端機改變大小，`Esc` 會被拖住
+（見上方「Esc 被拖住」）。
 
 ### 驗證方式：巢狀 tmux 裡按真的鍵
 
@@ -368,6 +392,14 @@ o-mode 工具又跑在隱藏 session 裡，按鍵只更新隱藏 session。結�
 換成 `script -q -k <log> gittu`，log 裡就有 gittu 實際收到的回答；或用一支送出 CPR、
 16 個 OSC 4、OSC 11、DA1 的探測腳本，延後 0.5 秒（等 popup 的 client 接上）再跑，
 看每段回答到達的時間。
+
+按鍵延遲：工具指令換成一支 raw mode、把每次 `read` 到的位元組與時間寫進 log 的探測
+腳本，對外層 `send-keys` 送 `Escape`、0.1 秒後再送 `x`：被拖住時 log 是一筆 `\x1bx`，
+正常是 `\x1b`、`x` 兩筆。要等內層 client 接上 5 秒以後再送：外層 tmux 的 pane 不回答
+OSC 10 / 11，內層 client 自己在前 5 秒也會拖住 `Esc`，測不準。也可以用 `tmux -vv` 啟動
+內層 server，看 log 有沒有 `increasing delay (active query)`、`tty_resize` 那行括號裡
+的像素是不是 0。比較 pane 與 popup 的反應時間：送鍵後反覆 `capture-pane` 外層，量到
+畫面第一次改變的時間。
 
 ## window 熱鍵：第 10 個以後用字母
 
