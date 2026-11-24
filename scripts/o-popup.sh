@@ -5,6 +5,20 @@
 #   o-popup.sh <name> <session id> <dir> <client> <command>   open the tool, or bring a hidden one back
 #   o-popup.sh --gc                                          drop hidden sessions and marks left behind
 
+# Inside the popup: attach to the tool's session. A popup's terminal has no pixel size, so tmux would ask it with
+# \e[14t, which a popup never answers; while that question is open tmux holds every lone Esc for 500ms (and an Esc
+# with a key right after it turns into Alt+key). So the size is filled in from the terminal's cell size first
+if [ "$1" = --attach ]; then
+  [ "${4:-0}" -gt 0 ] && [ "${5:-0}" -gt 0 ] && python3 - "$4" "$5" 2>/dev/null <<'EOF'
+import fcntl, os, struct, sys, termios
+w, h = int(sys.argv[1]), int(sys.argv[2])
+tty = os.open("/dev/tty", os.O_RDWR)
+rows, cols = struct.unpack("4H", fcntl.ioctl(tty, termios.TIOCGWINSZ, bytes(8)))[:2]
+fcntl.ioctl(tty, termios.TIOCSWINSZ, struct.pack("4H", rows, cols, cols * w, rows * h))
+EOF
+  exec env -u TMUX tmux -S "$2" -T RGB attach -f active-pane -t "=$3"
+fi
+
 if [ "$1" = --gc ]; then
   ids=$(tmux list-sessions -F '#{session_id}')
   # A client whose session closed may have been moved into a hidden session (the most recently used one): send it to
@@ -89,8 +103,9 @@ fi
 # TMUX is unset so the attach is not refused as nested; the popup's terminal is tmux-256color, so ask for RGB.
 # active-pane changes nothing in a one-pane session, it only tags the popup's client for --gc
 sock=$(tmux display -p '#{socket_path}')
+cell=$(tmux display -p -c "$client" '#{client_cell_width} #{client_cell_height}')
 tmux display-popup -c "$client" -b rounded -w 100% -h 100% -S "fg=#89b4fa" \
-  -E "env -u TMUX tmux -S '$sock' -T RGB attach -f active-pane -t '=$hidden'"
+  -E "'$0' --attach '$sock' '$hidden' $cell"
 [ -n "$watcher" ] && kill "$watcher" 2>/dev/null
 # The popup is closed: the tool is hidden if its session is still there
 if tmux has-session -t "=$hidden" 2>/dev/null; then
