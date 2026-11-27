@@ -270,6 +270,11 @@ attach 過去（`scripts/o-popup.sh`）：
 - session 名稱是 `_o<session id 的數字>_<工具>`，每個 session 每個工具一份。建立時
   設 `status off`、`detach-on-destroy on`、`pane-border-status off`，以及終端機的底色與
   色盤（見下方「顏色查詢」）
+- 隱藏 session 一建立就是 popup 框內的大小（`-x`、`-y` 給 client 的寬高各減 2，框線佔掉
+  兩格）。照預設的 80x24 建立的話，工具一啟動就先照 80x24 畫好第一張畫面，往往比 popup
+  接上還早；popup 接上時 tmux 先把這張小畫面放進去，視窗放大後工具才重畫成全螢幕，
+  開啟時就會看到「先出現一部分字，再展開」。從 `tmux -vv` 的 log 看得出來：工具 pane 的
+  第一筆輸出比 popup 的 `tty_resize` 早，接上後還有一行 `resize_window`
 - popup 裡執行 `o-popup.sh --attach`：先替 popup 的 pty 填上像素尺寸（見下方「Esc 被拖住」），
   再 `exec env -u TMUX tmux -S <socket> -T RGB attach -f active-pane`：
   - 拿掉 `TMUX`，否則 attach 會被當成巢狀而拒絕
@@ -398,7 +403,8 @@ o-mode 工具又跑在隱藏 session 裡，按鍵只更新隱藏 session。結�
 正常是 `\x1b`、`x` 兩筆。要等內層 client 接上 5 秒以後再送：外層 tmux 的 pane 不回答
 OSC 10 / 11，內層 client 自己在前 5 秒也會拖住 `Esc`，測不準。也可以用 `tmux -vv` 啟動
 內層 server，看 log 有沒有 `increasing delay (active query)`、`tty_resize` 那行括號裡
-的像素是不是 0。比較 pane 與 popup 的反應時間：送鍵後反覆 `capture-pane` 外層，量到
+的像素是不是 0（`-vv` 的 log 會記下 pane 啟動時的整份環境變數，token 也在裡面，用完就
+刪）。比較 pane 與 popup 的反應時間：送鍵後反覆 `capture-pane` 外層，量到
 畫面第一次改變的時間。
 
 ## window 熱鍵：第 10 個以後用字母
