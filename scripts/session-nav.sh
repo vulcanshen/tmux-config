@@ -8,4 +8,5 @@ current=$(tmux list-clients -F '#{client_name} #{client_session}' | awk -v c="$c
 target=$(tmux list-sessions -F '#{session_name}' | grep -v '^_o[0-9]*_' | awk -v cur="$current" -v dir="$dir" '
   { name[NR] = $0; if ($0 == cur) at = NR }
   END { if (!at || NR < 2) exit; print name[dir == "next" ? at % NR + 1 : (at + NR - 2) % NR + 1] }')
-[ -n "$target" ] && tmux switch-client -c "$client" -t "=$target"
+# No other session to go to (only one left): stay, like switch-client -n / -p, without an error
+[ -z "$target" ] || tmux switch-client -c "$client" -t "=$target"

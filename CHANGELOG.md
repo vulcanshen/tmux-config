@@ -4,6 +4,7 @@
 
 - **`prefix o b` 開 boxu**：跟其他 o-mode 工具一樣全螢幕開啟，`prefix o o` 可以縮小
 - **o-mode 工具開啟時不再先閃一小塊畫面**：原本工具會先在左上角畫出一部分，接著才展開成全螢幕；現在一出來就是全螢幕的畫面
+- **只剩一個 session 時，`prefix J` / `prefix K` 不再跳出錯誤**：原本會顯示 `'…/session-nav.sh prev …' returned 1`；現在跟 tmux 內建的切換一樣，留在原地
 
 ## 2026-11-24
 
