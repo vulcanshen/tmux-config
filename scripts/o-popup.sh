@@ -56,13 +56,19 @@ fi
 
 name=$1 parent=$2 dir=$3 client=$4 cmd=$5
 hidden="_o${parent#\$}_$name"
+# The popup's size inside its border, and the terminal's cell size in pixels
+read -r cols rows cellw cellh <<EOF
+$(tmux display -p -c "$client" '#{e|-:#{client_width},2} #{e|-:#{client_height},2} #{client_cell_width} #{client_cell_height}')
+EOF
 if ! tmux has-session -t "=$hidden" 2>/dev/null; then
+  # Made at the popup's size: at the default 80x24 the tool draws its first screen small, the popup shows that when it
+  # attaches, and only then does the tool redraw at full size.
   # No idle lock of its own: its activity is passed on to the session behind the popup, which does the locking.
   # The only client here is the one in the popup, which answers no colour queries: without a background of its own
   # tmux has no answer to OSC 11, and without a palette it passes OSC 4 on to the popup and holds every later reply
   # (OSC 11, DA1) until that times out (about 500ms). So the window gets the terminal's background and palette, set
   # in the same command as the session so they are there before the tool's first query
-  set -- new-session -d -s "$hidden" -c "$dir" "$cmd" \; \
+  set -- new-session -d -s "$hidden" -x "$cols" -y "$rows" -c "$dir" "$cmd" \; \
     set -t "=$hidden:" status off \; \
     set -t "=$hidden:" detach-on-destroy on \; \
     set -t "=$hidden:" lock-after-time 0 \; \
@@ -103,9 +109,8 @@ fi
 # TMUX is unset so the attach is not refused as nested; the popup's terminal is tmux-256color, so ask for RGB.
 # active-pane changes nothing in a one-pane session, it only tags the popup's client for --gc
 sock=$(tmux display -p '#{socket_path}')
-cell=$(tmux display -p -c "$client" '#{client_cell_width} #{client_cell_height}')
 tmux display-popup -c "$client" -b rounded -w 100% -h 100% -S "fg=#89b4fa" \
-  -E "'$0' --attach '$sock' '$hidden' $cell"
+  -E "'$0' --attach '$sock' '$hidden' $cellw $cellh"
 [ -n "$watcher" ] && kill "$watcher" 2>/dev/null
 # The popup is closed: the tool is hidden if its session is still there
 if tmux has-session -t "=$hidden" 2>/dev/null; then
